@@ -1,0 +1,372 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
+
+@mixin wk-line-clamp($i) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: #{$i};
+  overflow: hidden;
+}
+
+@mixin h-lh($i) {
+  height: #{$i}lh;
+}
+
+// Bootstrap breakpoints
+$xs: 0;
+$sm: 576px;
+$md: 768px;
+$lg: 992px;
+$xl: 1280px;
+
+$clr-accent-50: #f7f6fc;
+$clr-accent-100: #f0eef9;
+$clr-accent-200: #e2dff5;
+$clr-accent-300: #cdc6ec;
+$clr-accent-400: #b2a5e0;
+$clr-accent-500: #957ed1;
+$clr-accent-600: #8464c3;
+$clr-accent-700: #7352af;
+$clr-accent-800: #614493;
+$clr-accent-900: #503979;
+$clr-accent-950: #332451;
+
+$clr-highlight-50: #fff1f2;
+$clr-highlight-100: #fee5e7;
+$clr-highlight-200: #fccfd3;
+$clr-highlight-300: #faa7af;
+$clr-highlight-400: #f67686;
+$clr-highlight-500: #ee455f;
+$clr-highlight-600: #cb2143;
+$clr-highlight-700: #b8183c;
+$clr-highlight-800: #9a1738;
+$clr-highlight-900: #841736;
+$clr-highlight-950: #4a0719;
+
+$clr-main-50: #f6f6f7;
+$clr-main-100: #eef0f1;
+$clr-main-200: #e0e3e5;
+$clr-main-300: #cdd0d4;
+$clr-main-400: #b8bcc1;
+$clr-main-500: #a4a9b0;
+$clr-main-600: #9497a0;
+$clr-main-700: #7b7e87;
+$clr-main-800: #65676e;
+$clr-main-900: #54565b;
+$clr-main-950: #313235;
+
+$clr-tag-blue: #72d2ed;
+$clr-tag-blue-dim: #62b5cc;
+$clr-tag-red: #ed7272;
+$clr-tag-red-dim: #cc6262;
+$clr-tag-yellow: #edda72;
+$clr-tag-yellow-dim: #ccbc62;
+$clr-tag-green: #98ed72;
+$clr-tag-green-dim: #84cc62;
+$clr-tag-white: #ffffff;
+$clr-tag-white-dim: #d4d4d4;
+
+body {
+  font-family: "Roboto Condensed";
+}
+
+.navigation-bar {
+  background-color: $clr-main-200;
+
+  &__search-bar {
+    @media (min-width: $md) {
+      min-width: 300px;
+    }
+  }
+
+  &__logo-wrapper img {
+    padding: 0;
+    height: 40px;
+    margin: -14px 0 0 -5px;
+    @media (max-width: $lg) {
+      margin: -14px 0 0 -13px;
+    }
+  }
+}
+
+.footer {
+  background-color: $clr-main-900;
+  color: $clr-main-50;
+}
+
+.logo-search-section {
+  &__img-wrapper {
+    width: 200px;
+    height: 200px;
+    & img {
+      object-fit: contain;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &__form {
+    max-width: 500px;
+  }
+}
+
+.page-wrapper {
+  background-color: $clr-main-100;
+  min-height: 100vh;
+}
+
+.content-section-wrapper {
+  background-color: $clr-main-50;
+  min-height: 100vh;
+}
+
+.recipe-tile {
+  &__img-wrapper {
+    width: 100%;
+
+    @media (max-width: $sm) {
+      max-height: 250px;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__info p {
+    margin-bottom: 2px;
+  }
+
+  &__cooking-time-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.favorite-button {
+  border: none !important;
+  padding-right: 13px;
+  margin: auto !important;
+
+  &:hover {
+    fill: $clr-highlight-500;
+  }
+
+  &__fav-icon svg {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.star-rating {
+  display: flex;
+
+  &__icons svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.tag {
+  display: flex;
+  height: 36px;
+  border-radius: 20px;
+  padding: 5px 15px 5px 15px;
+  white-space: nowrap;
+
+  &-blue {
+    background-color: $clr-tag-blue;
+  }
+  &-blue-dim {
+    background-color: $clr-tag-blue-dim;
+  }
+  &-red {
+    background-color: $clr-tag-red;
+  }
+  &-red-dim {
+    background-color: $clr-tag-red-dim;
+  }
+  &-yellow {
+    background-color: $clr-tag-yellow;
+  }
+  &-yellow-dim {
+    background-color: $clr-tag-yellow-dim;
+  }
+  &-green {
+    background-color: $clr-tag-green;
+  }
+  &-green-dim {
+    background-color: $clr-tag-green-dim;
+  }
+  &-white {
+    background-color: $clr-tag-white;
+  }
+  &-white-dim {
+    background-color: $clr-tag-white-dim;
+  }
+
+  &__icon-wrapper {
+    padding: 0 0 0 5px;
+  }
+
+  &__icon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.w-300 {
+  width: 300px;
+}
+
+.max-w-500 {
+  max-width: 500px;
+}
+
+.no-style-link {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+.global-recipe-search {
+  background-color: $clr-main-400;
+}
+
+.icon-button {
+  justify-items: center;
+  & svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.d-hidden {
+  display: hidden;
+}
+
+.global-recipe-search__advanced-search {
+  background-color: $clr-main-500;
+}
+
+.about {
+  text-align: center;
+  padding: 100px 0 150px 0;
+
+  h1 {
+    font-size: 50px;
+  }
+}
+
+.story_contain {
+  padding: 100px 0 100px 0;
+  margin: 0 auto;
+
+  &__story {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__img {
+    flex: 1;
+    overflow: hidden;
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    text-align: left;
+    padding: 20px;
+  }
+
+  @media screen and (max-width: 768px) {
+    .story_contain__story {
+      flex-direction: column;
+    }
+    .story_contain__img {
+      padding: 10px;
+    }
+    .story_contain__content {
+      padding: 10px;
+    }
+  }
+}
+
+.mission {
+  padding: 100px 100px 100px 100px;
+
+  &__content {
+    text-align: center;
+  }
+
+  h2 {
+    padding-bottom: 10px;
+  }
+}
+
+.team {
+  padding: 100px 0 100px 0;
+
+  h2 {
+    text-align: center;
+    padding-bottom: 20px;
+  }
+
+  &__content {
+    text-align: center;
+  }
+}
+
+textarea {
+  resize: none;
+}
+
+.tag-selection-widget,
+.tag-measuring-widget {
+  &__input {
+    border-radius: var(--bs-border-radius);
+  }
+  &__input-active {
+    border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0;
+  }
+
+  &__dropdown {
+    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    background-color: $clr-main-50;
+  }
+}
+
+.tag-measuring-widget {
+  &__tag {
+    color: green !important;
+  }
+  &__amount {
+    width: 70px;
+    text-align: center;
+  }
+  &__units {
+    width: 90px;
+  }
+}
+
+.error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  &Content {
+    text-align: center;
+    padding: 30px 0 30px 0;
+    width: 400px;
+    height: 360px;
+    border: 2px solid black;
+
+    p {
+      padding: 10px 0 10px 0;
+    }
+  }
+}
