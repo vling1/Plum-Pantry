@@ -1,7 +1,7 @@
 {
   "homepage": "https://vling1.github.io/Plum-Pantry",
   "name": "plum-pantry",
-  "private": true,
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
