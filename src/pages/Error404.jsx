@@ -1,5 +1,6 @@
 import PageWrapper from "./../components/PageWrapper.jsx";
 import { Button, Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 // Requesting any non-existent page leads the user here
 
