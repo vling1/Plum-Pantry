@@ -13,11 +13,11 @@ import UserSettings from "./pages/UserSettings.jsx";
 import Error404 from "./pages/Error404.jsx";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./scss/styles.scss";
-import { createHashRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import MyTest from "./TestFilesForBKND/testPage.jsx";
 
-const router = createHashRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     element: <Homepage />,
