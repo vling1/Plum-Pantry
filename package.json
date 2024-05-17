@@ -1,8 +1,8 @@
 {
+  "homepage": "https://vling1.github.io/Plum-Pantry",
   "name": "plum-pantry",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://vling1.github.io/Plum-Pantry",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
