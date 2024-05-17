@@ -19,52 +19,52 @@ import MyTest from "./TestFilesForBKND/testPage.jsx";
 
 const router = createBrowserRouter([
   {
-    path: "/Plum-Pantry",
+    path: "/",
     element: <Homepage />,
     errorElement: <Error404 />,
   },
   {
-    path: "/Plum-Pantry/recipes",
+    path: "/recipes",
     element: <Recipes />,
   },
   {
-    path: "/Plum-Pantry/about",
+    path: "/about",
     element: <About />,
   },
   {
-    path: "/Plum-Pantry/login",
+    path: "/login",
     element: <Login />,
   },
   {
-    path: "/Plum-Pantry/forgot",
+    path: "/forgot",
     element: <ForgotPassword />,
   },
   {
-    path: "/Plum-Pantry/register",
+    path: "/register",
     element: <Register />,
   },
   {
-    path: "/Plum-Pantry/settings",
+    path: "/settings",
     element: <UserSettings />,
   },
   {
-    path: "/Plum-Pantry/view/:recipeID",
+    path: "/view/:recipeID",
     element: <RecipeViewer />,
   },
   {
-    path: "/Plum-Pantry/editor",
+    path: "/editor",
     element: <RecipeEditor />,
   },
   {
-    path: "/Plum-Pantry/editor/:recipeID",
+    path: "/editor/:recipeID",
     element: <RecipeEditor />,
   },
   {
-    path: "/Plum-Pantry/myrecipes",
+    path: "/myrecipes",
     element: <MyRecipes />,
   },
   {
-    path: "/Plum-Pantry/BKNDTest",
+    path: "/BKNDTest",
     element: <MyTest />,
   },
 ]);
