@@ -59,8 +59,8 @@ export default function Header({
             <Dropdown>
               <Dropdown.Toggle>My Account </Dropdown.Toggle>
               <Dropdown.Menu style={{ minWidth: "120px" }}>
-                <Dropdown.Item href="/settings">Settings</Dropdown.Item>
-                <Dropdown.Item href="/myrecipes">My Recipes</Dropdown.Item>
+                <Dropdown.Item><Link className="no-style-link" to="/settings">Settings</Link></Dropdown.Item>
+                <Dropdown.Item><Link className="no-style-link" to="/myrecipes">My Recipes</Link></Dropdown.Item>
                 <Dropdown.Divider />
                 <Dropdown.Item>Log Out</Dropdown.Item>
               </Dropdown.Menu>

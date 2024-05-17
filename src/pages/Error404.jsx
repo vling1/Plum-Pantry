@@ -21,9 +21,9 @@ export default function UserSettings() {
             Unfortunately, the page you were looking for <br></br>
             is not looking for you.
           </p>
-          <Button href="/" variant="info">
-            Take me to PlumPantry
-          </Button>
+          <Link to="/">
+            <Button variant="info">Take me to PlumPantry</Button>
+          </Link>
         </div>
       </div>
       {/* Meme? | Optional */}
