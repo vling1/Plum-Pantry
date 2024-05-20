@@ -1,13 +1,16 @@
 import PageWrapper from "./../components/PageWrapper.jsx";
 import { Button, Card, Container, Form, Modal, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { authLogin } from "../utils/auth.jsx";
 
 export default function Register() {
   //Handle Validation
   const [validated, setValidated] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
+    event.preventDefault();
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
@@ -25,6 +28,10 @@ export default function Register() {
       );
     }
     setValidated(true);
+    if (form.checkValidity() === true) {
+      authLogin(registerData.email);
+      navigate("/");
+    }
   };
 
   //Holds all register info

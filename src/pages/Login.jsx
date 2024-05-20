@@ -1,13 +1,16 @@
 import PageWrapper from "./../components/PageWrapper.jsx";
 import { Button, Card, Container, Form, Modal, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { authLogin } from "../utils/auth.jsx";
 
 export default function Login() {
   //Handle Validation
   const [validated, setValidated] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (event) => {
+    event.preventDefault();
     const form = event.currentTarget;
     if (form.checkValidity() === false) {
       event.preventDefault();
@@ -22,6 +25,11 @@ export default function Login() {
       );
     }
     setValidated(true);
+
+    if (form.checkValidity() === true) {
+      authLogin(loginData.email);
+      navigate("/");
+    }
   };
 
   //Holds all login info
@@ -44,7 +52,7 @@ export default function Login() {
               <Form.Group className="mb-2">
                 <Form.Control
                   required
-                  type="email"
+                  type="text"
                   placeholder="Login or e-mail"
                   maxLength={30}
                   onInput={(event) =>
@@ -89,13 +97,6 @@ export default function Login() {
             </Form>
           </Card.Body>
         </Card>
-      </div>
-      {/** Test Div for login Data */}
-
-      <div>
-        <h3>login Data | Test</h3>
-        <p>Email: {loginData.email}</p>
-        <p>Password: {loginData.password}</p>
       </div>
     </PageWrapper>
   );

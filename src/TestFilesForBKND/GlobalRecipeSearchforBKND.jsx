@@ -2,8 +2,8 @@ import { Form, Button } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { ReactSVG } from "react-svg";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import Tag from "./../components/Tag.jsx";
-import icons from "./../icon-data.js";
+import Tag from "../components/Tag.jsx";
+import icons from "../icon-data.js";
 import Data from "../services/Data.jsx";
 
 // If lesser number of tags appear in a category, we merge it with other categories
@@ -192,7 +192,7 @@ export default function GlobalRecipeSearch({ searchQueryHook = null }) {
     if (searchQueryHook) {
       const [searchQuery, setSearchQuery] = searchQueryHook();
       setSearchQuery(textSearchInput);
-      navigate("/recipes?" + newSearchParams.toString());
+      navigate("/BKNDTest?" + newSearchParams.toString());
     }
   }
   const navigate = useNavigate();

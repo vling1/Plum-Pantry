@@ -4,6 +4,7 @@ import FavoriteButton from "../components/FavoriteButton.jsx";
 import StarRating from "../components/StarRating.jsx";
 import icons from "./../icon-data.js";
 import { Link } from "react-router-dom";
+import { isLoggedIn, authInfo } from "../utils/auth.jsx";
 
 // Converts a numerical rating to an array of star icons
 function RatingToStars({ rating }) {
@@ -43,11 +44,13 @@ export default function RecipeTile(props) {
   return (
     <Col className="col-lg-3 col-md-4 col-sm-6 col-12">
       <Card className="recipe-tile" key={props.id}>
-        <div className="d-flex justify-content-between align-content-center recipe-tile__header">
-          <Card.Body>
-            <Card.Title className="m-0">{props.recipeTitle}</Card.Title>
-          </Card.Body>
-          <FavoriteButton />
+        <div className="d-flex justify-content-between align-items-start m-3 me-0 mt-0 recipe-tile__header">
+          <Card.Title className="mb-0 mt-3 recipe-tile__title">
+            {props.recipeTitle}
+          </Card.Title>
+          <div className="recipe-tile__fav-btn">
+            <FavoriteButton />
+          </div>
         </div>
         <div className="recipe-tile__img-wrapper">
           <Card.Img variant="middle" src={props.image} />
@@ -65,6 +68,12 @@ export default function RecipeTile(props) {
             <StarRating rating={props.rating} />
           </div>
           <div className="d-flex flex-column gap-2">
+            {isLoggedIn() && (props.username == authInfo()) ? (
+              <Link to={"/editor/" + props.recipeId}>
+                <Button variant="warning">Edit</Button>
+              </Link>
+            ) : (<></>)
+            }
             <Link to={"/view/" + props.recipeId}>
               <Button variant="primary">View</Button>
             </Link>

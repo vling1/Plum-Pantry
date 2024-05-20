@@ -27,8 +27,7 @@ export default function TagMeasuringWidget({
         // Adding an ingedient object
         let newIngr = {
           tag: tag,
-          amount: "0",
-          unit: "pcs.",
+          measure: "",
         };
         return [...prevIngr, newIngr];
       }
@@ -37,13 +36,12 @@ export default function TagMeasuringWidget({
   }
 
   // Set values for a selected an ingredient
-  function updateIngredient({ tag, amount = null, unit = null }) {
+  function updateIngredient({ tag, measure }) {
     setSelectedIngredients((prevIngr) =>
       prevIngr.map((ingr) => {
         // Matching tag to be edited
         if (ingr.tag == tag) {
-          if (amount) ingr.amount = amount;
-          if (unit) ingr.unit = unit;
+          ingr.measure = measure;
         }
         return ingr;
       })
@@ -93,7 +91,7 @@ export default function TagMeasuringWidget({
 
   const [isFocused, setIsFocused] = useState(false);
   const [selectedIngredients, setSelectedIngredients] =
-    selectedIngredientsHook ?? useState([]);
+    selectedIngredientsHook != null ? selectedIngredientsHook() : useState([]);
   const [tagSearchInput, setTagSearchInput] = useState("");
 
   return (
@@ -140,32 +138,19 @@ export default function TagMeasuringWidget({
               >
                 {ingr.tag}
               </Tag>
-              {/* Amount input */}
+              {/* Measure input */}
               <Form.Control
                 type="text"
-                maxlength="5"
-                className="tag-measuring-widget__amount"
+                maxlength="10"
+                className="tag-measuring-widget__measure"
+                placeholder="1 piece"
+                value={ingr.measure}
                 onChange={(event) => {
-                  // Updating ingredient's amount
-                  const amount = event.target.value;
-                  updateIngredient({ tag: ingr.tag, amount: amount });
+                  // Updating ingredient's measure
+                  const measure = event.target.value;
+                  updateIngredient({ tag: ingr.tag, measure: measure });
                 }}
               />
-              {/* Measuring units */}
-              <Form.Select
-                className="tag-measuring-widget__units"
-                onChange={(event) => {
-                  // Updating ingredient's unit
-                  const unit = event.target.value;
-                  updateIngredient({ tag: ingr.tag, unit: unit });
-                }}
-              >
-                {data.units.map((unit) => (
-                  <option key={unit} value={unit}>
-                    {unit}
-                  </option>
-                ))}
-              </Form.Select>
             </div>
           ))}
         </div>

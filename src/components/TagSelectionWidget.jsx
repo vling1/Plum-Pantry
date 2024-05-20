@@ -1,6 +1,7 @@
 import { Form } from "react-bootstrap";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Tag from "./Tag.jsx";
+import Data from "../services/Data.jsx";
 
 import data from "../data.js";
 
@@ -18,7 +19,7 @@ export default function TagSelectionWidget({
   // Add a tag by name to the list of selected tags
   function addTag(tag) {
     setSelectedTags((prevTags) => {
-      if (!prevTags.includes(tag) && data.tags.includes(tag)) {
+      if (!prevTags.includes(tag) && tags.includes(tag)) {
         return [...prevTags, tag];
       }
       return prevTags;
@@ -28,7 +29,7 @@ export default function TagSelectionWidget({
   // Generates a list of first N tags (N = maxSuggestionsLength) matching the text search
   function generateSuggestionList() {
     // Tag search filtering
-    const allTags = data.tags.filter((tag) =>
+    const allTags = tags.filter((tag) =>
       tag.toLowerCase().includes(tagSearchInput.toLowerCase())
     );
     if (allTags.length == 0) return "No search results";
@@ -64,8 +65,23 @@ export default function TagSelectionWidget({
   }
 
   const [isFocused, setIsFocused] = useState(false);
-  const [selectedTags, setSelectedTags] = selectedTagsHook ?? useState([]);
+  const [selectedTags, setSelectedTags] =
+    selectedTagsHook != null ? selectedTagsHook() : useState([]);
   const [tagSearchInput, setTagSearchInput] = useState("");
+  const [tags, setTags] = useState([]);
+
+  useEffect(() => {
+    Data.get("Tags").then((response) => {
+      let arr = [];
+      response.forEach(item => {
+        if (item.tagName != null) {
+          arr.push(item.tagName);
+        }
+      })
+      setTags(arr);
+    }
+    );
+  }, []);
 
   return (
     <div className="position-relative tag-selection-widget">

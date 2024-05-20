@@ -32,6 +32,7 @@ export default function RecipeViewer() {
         setRecipe(response.data);
         console.log(response.data);
       } else {
+        console.error("Invalid response format:", response.data);
         navigator("/error404");
       }
     } catch (err) {
@@ -52,11 +53,11 @@ export default function RecipeViewer() {
       <div className="d-flex justify-content-center">
         <Card className="mt-4 mb-4 col-md-10" border="dark">
           <Card.Header>
-            <div className="row">
+            <div className="row align-items-center">
               <Card.Body className="col-2" />
               {/* Recipe title */}
               <Card.Body className="col-8">
-                <h3 className="text-center">{recipe.recipeTitle}</h3>
+                <h3 className="text-center p-0 m-0">{recipe.recipeTitle}</h3>
               </Card.Body>
               <Card.Body className="col-2 text-end">
                 <FavoriteButton />
@@ -92,8 +93,8 @@ export default function RecipeViewer() {
       <div className="d-flex justify-content-center">
         <div className="d-flex col-md-10 mb-4 gap-2 flex-wrap">
           {/* Function to test that tags properly wrap*/}
-          {recipe.tags?.map((item) => (
-            <Tag icon="none">{item}</Tag>
+          {recipe.recipeTags?.map((tag) => (
+            <Tag icon="none">{tag}</Tag>
           ))}
         </div>
       </div>
@@ -123,15 +124,11 @@ export default function RecipeViewer() {
             </Card.Title>
             <Card.Body>
               {/* Function to test formatting*/}
-              {data.tags.map((item, i) => {
-                if (i < 10) {
-                  return (
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <Tag icon="none">{item}</Tag>1 unit
-                    </div>
-                  );
-                }
-              })}
+              {recipe.measDescr?.map((measure) => (
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <Tag icon="none">{measure.k}</Tag>{measure.v}
+                </div>
+              ))}
             </Card.Body>
           </Card>
         </div>

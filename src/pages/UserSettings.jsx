@@ -3,9 +3,20 @@ import { Button, Card, Form, Tab, Tabs } from "react-bootstrap";
 import ChangeUsername from "../components/ChangeUsername.jsx";
 import ChangeEmail from "../components/ChangeEmail.jsx";
 import ChangePassword from "../components/ChangePassword.jsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { isLoggedIn } from "../utils/auth.jsx";
 
 export default function UserSettings() {
+  const navigate = useNavigate();
+
+  // Check if user is not logged in, redirect to login page
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate("/error404");
+    }
+  }, []);
+
   return (
     <PageWrapper>
       <Tabs defaultActiveKey="general">

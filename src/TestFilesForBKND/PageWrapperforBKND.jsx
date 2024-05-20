@@ -1,9 +1,7 @@
-import Header from "./Header.jsx";
-import Footer from "./Footer.jsx";
+import Header from "../components/Header.jsx";
+import Footer from "../components/Footer.jsx";
 import { Container } from "react-bootstrap";
-import GlobalRecipeSearch from "./GlobalRecipeSearch.jsx";
-import { useState } from "react";
-import { useEffect } from "react";
+import GlobalRecipeSearch from "./GlobalRecipeSearchforBKND.jsx";
 
 export default function PageWrapper({
   children,

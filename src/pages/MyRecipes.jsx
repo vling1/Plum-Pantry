@@ -1,44 +1,60 @@
 import PageWrapper from "./../components/PageWrapper.jsx";
 import { Col, Container, Row, Pagination } from "react-bootstrap";
 import RecipeTile from "../components/RecipeTile.jsx";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import Data from "../services/Data.jsx";
+import { useState, useEffect } from "react";
+import { isLoggedIn, authInfo } from "../utils/auth.jsx";
 
-import data from "../data.js";
 import icons from "./../icon-data.js";
 
 const maxItemsOnPage = 24;
-const pageMax = getPageMaxNumber(data.recipies);
+let pageMax;
+
+let username;
 
 // Returns the number of pages that are needed to display given data
 function getPageMaxNumber(dataArray) {
-  return Math.max(1, Math.ceil(dataArray.length / maxItemsOnPage));
+  if (!dataArray) return 1;
+
+  let count = 0;
+  dataArray.forEach(item => {
+    if (item.username == username) {
+      count++;
+    }
+  })
+
+  return Math.max(1, Math.ceil(count / maxItemsOnPage));
 }
 
 // This function takes all data from the query and returns
 // a subarray of data to display it on the given page
 function getPageData(dataArray, pageNumber) {
-  if (dataArray.length <= maxItemsOnPage) return dataArray;
+  console.log("dataArray", dataArray);
+  if (!dataArray) return [];
+
+  let arr = [];
+  dataArray.forEach(item => {
+    if (item.username == username) {
+      arr.push(item);
+    }
+  })
+
+  if (arr.length <= maxItemsOnPage) return arr;
   else {
     if (pageNumber > pageMax) {
       pageNumber = pageMax;
     }
     const startPos = (pageNumber - 1) * maxItemsOnPage;
-    console.log(
-      "Displayed items: from",
-      startPos,
-      "to",
-      startPos + maxItemsOnPage
-    );
-    return dataArray.slice(startPos, startPos + maxItemsOnPage);
+    return arr.slice(startPos, startPos + maxItemsOnPage);
   }
 }
 
 export default function Recipes() {
-  let page = 1;
-  let [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Generating a page button for a given page number or special value
-  function generatePageButton(buttonText) {
+  function generatePageButton(buttonText, key) {
     console.log("page", page);
     // Disabled pages: 1) "..." 2) next when there's no next 3) prev when there's no prev
     if (
@@ -46,34 +62,32 @@ export default function Recipes() {
       ((buttonText == "‹" || buttonText == "«") && page == 1) ||
       ((buttonText == "›" || buttonText == "»") && page == pageMax)
     )
-      return <Pagination.Item disabled>{buttonText}</Pagination.Item>;
+      return (
+        <Pagination.Item disabled key={key}>
+          {buttonText}
+        </Pagination.Item>
+      );
     // Active page
     if (buttonText == page)
       return (
-        <Pagination.Item active>
-          <Link
-            to={"/myrecipes?" + searchParams.toString()}
-            className="no-style-link"
-          >
-            {buttonText}
-          </Link>
+        <Pagination.Item key={key} active>
+          {buttonText}
         </Pagination.Item>
       );
     // Control buttons
-    let newParams = searchParams;
+    let newParams = new URLSearchParams(searchParams);
     if (buttonText == "‹") newParams.set("page", page - 1);
     else if (buttonText == "›") newParams.set("page", page + 1);
     else if (buttonText == "«") newParams.set("page", 1);
     else if (buttonText == "»") newParams.set("page", pageMax);
     else newParams.set("page", buttonText);
+
     return (
-      <Pagination.Item>
-        <Link
-          to={"/myrecipes?" + newParams.toString()}
-          className="no-style-link"
-        >
-          {buttonText}
-        </Link>
+      <Pagination.Item
+        key={key}
+        onClick={() => navigate("/myrecipes?" + newParams.toString())}
+      >
+        {buttonText}
       </Pagination.Item>
     );
   }
@@ -84,7 +98,6 @@ export default function Recipes() {
     // "Previous" and "first" buttons
     buttonList.push("«");
     buttonList.push("‹");
-    console.log("pageMax", pageMax);
     if (pageMax <= 5) {
       // Small number of pages; no pagination reductions
       for (let i = 1; i <= pageMax; i++) buttonList.push(i);
@@ -106,7 +119,7 @@ export default function Recipes() {
         buttonList.push(pageMax);
       } else {
         // [ACTIVE] [4] [5]
-        for (let i = page; i <= getPageMaxNumber(data.recipies); i++)
+        for (let i = page; i <= getPageMaxNumber(recipes); i++)
           buttonList.push(i);
       }
     }
@@ -114,28 +127,71 @@ export default function Recipes() {
     buttonList.push("›");
     buttonList.push("»");
     // Generating actual buttons from the list
-    console.log("buttonList", buttonList);
-    return buttonList.map((item) => generatePageButton(item));
+    return buttonList.map((item, index) => generatePageButton(item, index));
   }
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [recipes, setRecipes] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (!isLoggedIn()) {
+      navigate("/error404");
+    } else {
+      username = authInfo();
+    }
+
+    Data.get("Recipes").then((response) =>
+      setRecipes(
+        Data.sortRecipes(response, searchParams.get("sort"), searchQuery)
+      )
+    );
+  }, [searchQuery]);
+
+  pageMax = getPageMaxNumber(recipes);
+
+  // ================ READING PARAMS FROM THE URL ================
+
+  // Page parameter must be integer (page=1 otherwise)
+  let page = parseInt(searchParams.get("page"));
+  if (isNaN(page)) {
+    page = 1;
+  }
+  // Page parameter must be not greater then pageMax (page=pageMax otherwise)
+  else if (page > pageMax) {
+    page = pageMax;
+  }
+  // Page parameter must be not lesser then 1 (page=1 otherwise)
+  else if (page < 1) {
+    page = 1;
+  }
+
+  // =============================================================
+
   return (
-    <PageWrapper showSearchBar="false" showGlobalRecipeSearch="true">
+    <PageWrapper
+      showSearchBar="false"
+      showGlobalRecipeSearch="false"
+      searchQueryHook={() => [searchQuery, setSearchQuery]}
+    >
       {/* =========== Recipe tiles =========== */}
       <section className="d-flex mb-4 recipe-suggestion-section">
         <Container fluid>
           <Row className="row-gap-4 pb-4">
-            <Col className="col-lg-3 col-md-4 col-sm-6 col-12">
+            <Col className="col-lg-3 col-12">
               <Link className="no-style-link" to="/editor">
                 <div
-                  className="h-100 bg-secondary-subtle d-flex justify-content-center align-items-center"
-                  style={{ border: "dashed"}}
+                  className="h-100 bg-body-secondary d-flex justify-content-center align-items-center"
+                  style={{ border: "dashed" }}
                 >
-                  <img src={icons.plus} width={75} height={75}/>
+                  <img src={icons.plus} width={75} height={75} />
                 </div>
               </Link>
             </Col>
-            {getPageData(data.recipies, page).map((item) => (
-              <RecipeTile {...item} key={item.id} />
+            {getPageData(recipes, page).map((item) => (
+              item.username == username ? (
+              <RecipeTile {...item} key={item.recipeId} />
+            ) : (<></>)
             ))}
           </Row>
         </Container>

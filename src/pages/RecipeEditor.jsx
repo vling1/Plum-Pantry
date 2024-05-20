@@ -1,11 +1,17 @@
 import PageWrapper from "./../components/PageWrapper.jsx";
 import { Button, Card, Form, Image, InputGroup } from "react-bootstrap";
-import { useSearchParams, useParams, useNavigate, Link } from "react-router-dom";
+import {
+  useSearchParams,
+  useParams,
+  useNavigate,
+  Link,
+} from "react-router-dom";
 import { useEffect, useState } from "react";
 import Tag from "../components/Tag.jsx";
 import TagSelectionWidget from "../components/TagSelectionWidget.jsx";
 import TagMeasuringWidget from "../components/TagMeasuringWidget.jsx";
 import api from "../api/axiosConfig.jsx";
+import { isLoggedIn, authInfo } from "../utils/auth.jsx";
 
 export default function RecipeEditor() {
   /*
@@ -13,9 +19,16 @@ export default function RecipeEditor() {
     For example: WEBSITE.COM/?query=tag1+tag2+tag3&sort=favorite
     Will get an object with two parameters: query="tag1 tag2 tag3" and sort="favorite"
   */
+
+  let { recipeID } = useParams();
+  const navigate = useNavigate();
+
+  let username = "plumPantry_user";
+
   let [searchParams, setSearchParams] = useSearchParams();
   console.log(searchParams);
 
+  // validation check for cooking time
   function cookingTimeNotValid(time) {
     if (time != "" && /^[0-9]+$/.test(time)) {
       return false;
@@ -23,29 +36,43 @@ export default function RecipeEditor() {
     return true;
   }
 
+  // function format minutes into hours and minutes
   function timeFormat(time) {
     let m = time % 60;
     let h = Math.floor(time / 60);
     return [h, m];
   }
 
+  function convertToBase64(file) {
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64String = reader.result
+        .replace("data:", "")
+        .replace(/^.+,/, "");
+      console.log(base64String);
+      formData.image = "data:image/jpeg;base64," + base64String;
+    };
+    reader.readAsDataURL(file);
+  }
+
   // data for form fields
   const [formData, setFormData] = useState({
     title: "",
     instructions: "",
-    image: "",
+    image: "https://placehold.co/300",
     hours: "",
     minutes: "",
   });
   // form check for validity
-  const [notValid, setNotValid] = useState({
+  const [notValid] = useState({
     title: false,
     instructions: false,
     hours: false,
     minutes: false,
   });
-  const [file, setFile] = useState();
-  const [privacy, setPrivacy] = useState("");
+  const [file, setFile] = useState("");
+  const [privacy, setPrivacy] = useState();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -57,10 +84,9 @@ export default function RecipeEditor() {
 
   const handleImage = (event) => {
     console.log(event.target.files);
+    convertToBase64(event.target.files[0]);
     setFile(URL.createObjectURL(event.target.files[0]));
-
-    handleChange(event);
-  }
+  };
 
   // validation on submit
   const handleSubmit = (event) => {
@@ -84,30 +110,114 @@ export default function RecipeEditor() {
     ) {
       event.preventDefault();
       event.stopPropagation();
+    } else {
+      createOrUpdateRecipe();
+      navigate("/recipes");
     }
   };
 
-  const {recipeID} = useParams();
-  const navigator = useNavigate();
+  
 
+  // send data to database for creating or updating recipe
+  const createOrUpdateRecipe = async () => {
+    try {
+      let ingredients = ingredientData.map((item) => item.tag);
+
+      let ingrData = ingredientData.map((item) => ({
+        k: item.tag,
+        v: item.measure,
+      }));
+
+      if (recipeID) {
+        const response = await api.get("/db/Recipes/recipe/" + recipeID);
+
+        const recipe = {
+          recipeTitle: formData.title,
+          image: formData.image,
+          cookTime: (parseInt(formData.hours) * 60) + parseInt(formData.minutes),
+          rating: response.data.rating + 0.1,
+          username: response.data.username,
+          isPublic: privacy == "true",
+          recipeTags: tagData,
+          instructions: formData.instructions.split("\n"),
+          ingredients: ingredients,
+          measDescr: ingrData,
+        };
+        
+        api.put("/db/Recipes/update/" + recipeID, recipe).then((response) => {
+          console.log(response.data);
+        }).catch(error => {
+          console.error(error);
+        })
+
+      } else {
+        const recipe = {
+          recipeTitle: formData.title,
+          image: formData.image,
+          cookTime: (parseInt(formData.hours) * 60) + parseInt(formData.minutes),
+          rating: 0.1,
+          username: username,
+          isPublic: privacy == "true",
+          tags: tagData,
+          instructions: formData.instructions.split("\n"),
+          ingredients: ingredients,
+          measDescr: ingrData,
+        };
+
+        try {
+          let result = await api.post("/db/Recipes", recipe);
+          console.log(result.response.data)
+        } catch (error) {
+          console.error(error.response.data);
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching recipe:", err);
+    }
+  };
+
+  // fetch data into editor for when updating an existing recipe
   const getRecipe = async () => {
     try {
       const response = await api.get("/db/Recipes/recipe/" + recipeID);
       if (response.data) {
         let time = timeFormat(response.data.cookTime);
+        let ingredients = response.data.measDescr.map((dict) => ({
+          tag: dict.k,
+          measure: dict.v,
+        }));
 
         setFormData({
           ...formData,
           title: response.data.recipeTitle,
-          instructions: (response.data.instructions).join(' '),
-          hours: time[0],
-          minutes: time[1],
-        })
+          instructions: response.data.instructions.join("\n"),
+          image: response.data.image,
+          hours: time[0].toString(),
+          minutes: time[1].toString(),
+        });
         setFile(response.data.image);
-
-        console.log(response.data);
+        setIngredientData(ingredients);
+        if (response.data.recipeTags != null) {
+          setTagData(response.data.recipeTags);
+        }
+        setPrivacy(response.data.isPublic);
       } else {
-        navigator("/error404")
+        console.error("Invalid response format:", response.data);
+        navigate("/error404");
+      }
+    } catch (err) {
+      console.error("Error fetching recipe:", err);
+    }
+  };
+
+  // delete an existing recipe from database
+  const deleteRecipe = async () => {
+    try {
+      if (recipeID) {
+        api.delete("/db/Recipes/delete/recipe/" + recipeID);
+        navigate("/recipes");
+      } else {
+        navigate("/recipes");
       }
     } catch (err) {
       console.error("Error fetching recipe:", err);
@@ -117,11 +227,20 @@ export default function RecipeEditor() {
   useEffect(() => {
     // This code happens only once when the page
     // is rendered the first time
+    if (!isLoggedIn()) {
+      navigate("/error404")
+    } else {
+      username = authInfo();
+    }
+
     if (recipeID) {
       getRecipe();
     }
     window.scrollTo(0, 0);
   }, []);
+
+  const [ingredientData, setIngredientData] = useState([]);
+  const [tagData, setTagData] = useState([]);
 
   return (
     <PageWrapper>
@@ -169,8 +288,6 @@ export default function RecipeEditor() {
               <Form.Control
                 className="border-dark"
                 type="file"
-                name="image"
-                value={formData.image}
                 accept=".png, .jpg, .jpeg"
                 onChange={handleImage}
                 size="lg"
@@ -200,7 +317,6 @@ export default function RecipeEditor() {
                   <InputGroup>
                     <Form.Control
                       type="text"
-                      inputMode="numeric"
                       name="minutes"
                       value={formData.minutes}
                       onChange={handleChange}
@@ -216,14 +332,21 @@ export default function RecipeEditor() {
             {/* Ingredient selection */}
             <Card className="mb-3" border="dark">
               <Card.Body>
-                <TagMeasuringWidget />
+                <TagMeasuringWidget
+                  selectedIngredientsHook={() => [
+                    ingredientData,
+                    setIngredientData,
+                  ]}
+                />
               </Card.Body>
             </Card>
 
             {/* Miscellaneous tag selection */}
             <Card className="mb-3" border="dark">
               <Card.Body>
-                <TagSelectionWidget />
+                <TagSelectionWidget
+                  selectedTagsHook={() => [tagData, setTagData]}
+                />
               </Card.Body>
             </Card>
 
@@ -231,9 +354,12 @@ export default function RecipeEditor() {
             <Card className="mb-3" border="dark">
               <Card.Body>
                 <h5>Who can see this recipe?</h5>
-                <Form.Select onChange={(event) => setPrivacy(event.target.value)}>
-                  <option value="0">Only me</option>
-                  <option value="1">Anyone</option>
+                <Form.Select
+                  onChange={(event) => setPrivacy(event.target.value)}
+                  value={privacy}
+                >
+                  <option value={false}>Only me</option>
+                  <option value={true}>Anyone</option>
                 </Form.Select>
               </Card.Body>
             </Card>
@@ -246,7 +372,9 @@ export default function RecipeEditor() {
                 </Button>
                 <Button variant="warning">Preview</Button>
               </div>
-              <Button variant="danger">Delete</Button>
+              <Button onClick={deleteRecipe} variant="danger">
+                Delete
+              </Button>
             </div>
           </div>
         </div>

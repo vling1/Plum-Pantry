@@ -1,23 +1,23 @@
 import PageWrapper from "./../components/PageWrapper.jsx";
 import { Container, Row, Pagination } from "react-bootstrap";
 import RecipeTile from "../components/RecipeTile.jsx";
-import { useSearchParams, Link, json } from "react-router-dom";
-import api from "../api/axiosConfig.jsx";
+import { useSearchParams, Link, json, useNavigate } from "react-router-dom";
+import Data from "../services/Data.jsx";
 import { useEffect, useState } from "react";
-
-import data from "../data.js";
 
 const maxItemsOnPage = 24;
 let pageMax;
 
 // Returns the number of pages that are needed to display given data
 function getPageMaxNumber(dataArray) {
+  if (!dataArray) return 1;
   return Math.max(1, Math.ceil(dataArray.length / maxItemsOnPage));
 }
 
 // This function takes all data from the query and returns
 // a subarray of data to display it on the given page
 function getPageData(dataArray, pageNumber) {
+  console.log("dataArray", dataArray);
   if (!dataArray) return [];
   if (dataArray.length <= maxItemsOnPage) return dataArray;
   else {
@@ -25,19 +25,15 @@ function getPageData(dataArray, pageNumber) {
       pageNumber = pageMax;
     }
     const startPos = (pageNumber - 1) * maxItemsOnPage;
-    console.log(
-      "Displayed items: from",
-      startPos,
-      "to",
-      startPos + maxItemsOnPage
-    );
     return dataArray.slice(startPos, startPos + maxItemsOnPage);
   }
 }
 
 export default function Recipes() {
+  const navigate = useNavigate();
+
   // Generating a page button for a given page number or special value
-  function generatePageButton(buttonText) {
+  function generatePageButton(buttonText, key) {
     console.log("page", page);
     // Disabled pages: 1) "..." 2) next when there's no next 3) prev when there's no prev
     if (
@@ -45,31 +41,32 @@ export default function Recipes() {
       ((buttonText == "‹" || buttonText == "«") && page == 1) ||
       ((buttonText == "›" || buttonText == "»") && page == pageMax)
     )
-      return <Pagination.Item disabled>{buttonText}</Pagination.Item>;
+      return (
+        <Pagination.Item disabled key={key}>
+          {buttonText}
+        </Pagination.Item>
+      );
     // Active page
     if (buttonText == page)
       return (
-        <Pagination.Item active>
-          <Link
-            to={"/recipes?" + searchParams.toString()}
-            className="no-style-link"
-          >
-            {buttonText}
-          </Link>
+        <Pagination.Item key={key} active>
+          {buttonText}
         </Pagination.Item>
       );
     // Control buttons
-    let newParams = searchParams;
+    let newParams = new URLSearchParams(searchParams);
     if (buttonText == "‹") newParams.set("page", page - 1);
     else if (buttonText == "›") newParams.set("page", page + 1);
     else if (buttonText == "«") newParams.set("page", 1);
     else if (buttonText == "»") newParams.set("page", pageMax);
     else newParams.set("page", buttonText);
+
     return (
-      <Pagination.Item>
-        <Link to={"/recipes?" + newParams.toString()} className="no-style-link">
-          {buttonText}
-        </Link>
+      <Pagination.Item
+        key={key}
+        onClick={() => navigate("/recipes?" + newParams.toString())}
+      >
+        {buttonText}
       </Pagination.Item>
     );
   }
@@ -80,7 +77,6 @@ export default function Recipes() {
     // "Previous" and "first" buttons
     buttonList.push("«");
     buttonList.push("‹");
-    console.log("pageMax", pageMax);
     if (pageMax <= 5) {
       // Small number of pages; no pagination reductions
       for (let i = 1; i <= pageMax; i++) buttonList.push(i);
@@ -102,7 +98,7 @@ export default function Recipes() {
         buttonList.push(pageMax);
       } else {
         // [ACTIVE] [4] [5]
-        for (let i = page; i <= getPageMaxNumber(data.recipies); i++)
+        for (let i = page; i <= getPageMaxNumber(recipes); i++)
           buttonList.push(i);
       }
     }
@@ -110,45 +106,47 @@ export default function Recipes() {
     buttonList.push("›");
     buttonList.push("»");
     // Generating actual buttons from the list
-    console.log("buttonList", buttonList);
-    return buttonList.map((item) => generatePageButton(item));
+    return buttonList.map((item, index) => generatePageButton(item, index));
   }
 
-  let [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [recipes, setRecipes] = useState([]);
-  // API access
-  const getRecipes = async () => {
-    try {
-      const response = await api.get("/db/Recipes");
-      if (response.data && Array.isArray(response.data)) {
-        setRecipes(response.data);
-        console.log(response.data);
-      } else {
-        console.error("Invalid response format:", response.data);
-      }
-    } catch (err) {
-      console.error("Error fetching recipes:", err);
-    }
-  };
+  const [searchQuery, setSearchQuery] = useState("");
+
   useEffect(() => {
-    getRecipes();
-  }, []);
+    Data.get("Recipes").then((response) =>
+      setRecipes(
+        Data.sortRecipes(response, searchParams.get("sort"), searchQuery)
+      )
+    );
+  }, [searchQuery]);
+
   pageMax = getPageMaxNumber(recipes);
+
+  // ================ READING PARAMS FROM THE URL ================
 
   // Page parameter must be integer (page=1 otherwise)
   let page = parseInt(searchParams.get("page"));
   if (isNaN(page)) {
-    setSearchParams("page", 1);
     page = 1;
   }
   // Page parameter must be not greater then pageMax (page=pageMax otherwise)
-  if (page > pageMax) {
-    setSearchParams("page", pageMax);
+  else if (page > pageMax) {
     page = pageMax;
   }
+  // Page parameter must be not lesser then 1 (page=1 otherwise)
+  else if (page < 1) {
+    page = 1;
+  }
+
+  // =============================================================
 
   return (
-    <PageWrapper showSearchBar="false" showGlobalRecipeSearch="true">
+    <PageWrapper
+      showSearchBar="false"
+      showGlobalRecipeSearch="true"
+      searchQueryHook={() => [searchQuery, setSearchQuery]}
+    >
       {/* =========== Recipe tiles =========== */}
       <section className="d-flex mb-4 recipe-suggestion-section">
         <Container fluid>

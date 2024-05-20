@@ -24,7 +24,7 @@ const router = createBrowserRouter([
     errorElement: <Error404 />,
   },
   {
-    path: "/recipes",
+    path: "/recipes/",
     element: <Recipes />,
   },
   {
@@ -64,7 +64,7 @@ const router = createBrowserRouter([
     element: <MyRecipes />,
   },
   {
-    path: "/BKNDTest",
+    path: "/BKNDTest/",
     element: <MyTest />,
   },
 ]);

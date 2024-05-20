@@ -2,15 +2,12 @@ import { Button, Container, Form, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import headerLogo from "./../assets/logo/logo-small.webp";
 import Dropdown from "react-bootstrap/Dropdown";
+import { authInfo, authLogout } from "./../utils/auth.jsx";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-{
-  /* Need to implement isLoggedIn function */
-}
-
-export default function Header({
-  showSearchBar = "true",
-  isLoggedIn = "true",
-}) {
+export default function Header({ showSearchBar = "true" }) {
+  const [username, setUsername] = useState(authInfo());
   return (
     <Navbar expand="lg" className="sticky-top navigation-bar px-3 py-2">
       <Navbar.Brand className="pe-3">
@@ -33,9 +30,6 @@ export default function Header({
           <Link className="no-style-link" to="/about">
             About
           </Link>
-          <Link className="no-style-link" to="/BKNDTest">
-            BKNDTest
-          </Link>
         </Nav>
         {/* Search Bar */}
         {showSearchBar == "true" ? (
@@ -53,16 +47,38 @@ export default function Header({
         )}
 
         {/* Condition if logged in or not */}
-        {isLoggedIn == "true" ? (
+        {username != null ? (
           // Logged In
           <Nav className="flex-row gap-1 mt-2 mt-lg-0 ms-0 ms-lg-4 nagivation-bar__right-buttons">
             <Dropdown>
               <Dropdown.Toggle>My Account </Dropdown.Toggle>
               <Dropdown.Menu style={{ minWidth: "120px" }}>
-                <Dropdown.Item><Link className="no-style-link" to="/settings">Settings</Link></Dropdown.Item>
-                <Dropdown.Item><Link className="no-style-link" to="/myrecipes">My Recipes</Link></Dropdown.Item>
+                <Dropdown.Item>{username}</Dropdown.Item>
+                <Dropdown.Item>
+                  <Link className="no-style-link" to="/settings">
+                    Settings
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link className="no-style-link" to="/myrecipes">
+                    My Recipes
+                  </Link>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Link className="no-style-link" to="/editor">
+                    New Recipe
+                  </Link>
+                </Dropdown.Item>
                 <Dropdown.Divider />
-                <Dropdown.Item>Log Out</Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => {
+                    authLogout();
+                    setUsername(null);
+                    window.location.reload();
+                  }}
+                >
+                  Log Out
+                </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
           </Nav>
