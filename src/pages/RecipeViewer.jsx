@@ -10,8 +10,6 @@ import { useEffect, useState } from "react";
 import api from "../api/axiosConfig.jsx";
 import { timeFormat } from "../components/RecipeTile.jsx";
 
-import data from "../data.js";
-
 export default function RecipeViewer() {
   /*
     Get parameters from the link
@@ -23,7 +21,7 @@ export default function RecipeViewer() {
 
   let { recipeID } = useParams();
   const [recipe, setRecipe] = useState("");
-  const navigator = useNavigate();
+  const navigate = useNavigate();
 
   const getRecipe = async () => {
     try {
@@ -33,10 +31,11 @@ export default function RecipeViewer() {
         console.log(response.data);
       } else {
         console.error("Invalid response format:", response.data);
-        navigator("/error404");
+        navigate("/error404");
       }
     } catch (err) {
       console.error("Error fetching recipes:", err);
+      navigate("/error404");
     }
   };
 

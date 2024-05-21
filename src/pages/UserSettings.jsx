@@ -10,7 +10,7 @@ import { isLoggedIn } from "../utils/auth.jsx";
 export default function UserSettings() {
   const navigate = useNavigate();
 
-  // Check if user is not logged in, redirect to login page
+  // Check if user is logged in, if not redirect to login page
   useEffect(() => {
     if (!isLoggedIn()) {
       navigate("/error404");

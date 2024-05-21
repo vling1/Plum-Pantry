@@ -18,8 +18,6 @@ export default function Register() {
     }
 
     //display register info
-    //validation error wont show if I
-    // put setValidated(true); in else
     else {
       alert(
         `Username: ${registerData.username}
@@ -29,13 +27,12 @@ export default function Register() {
     }
     setValidated(true);
     if (form.checkValidity() === true) {
-      authLogin(registerData.email);
+      authLogin(registerData.username);
       navigate("/");
     }
   };
 
   //Holds all register info
-  //To gather data is within the Form.Control from onInput
   const [registerData, setRegisterData] = useState({
     username: "",
     email: "",
@@ -155,15 +152,6 @@ export default function Register() {
           </Button>
         </Modal.Footer>
       </Modal>
-      {/** Test Div for registration Data */}
-      {/**  
-      <div>
-        <h3>Register Data | Test</h3>
-        <p>Username: {registerData.username}</p>
-        <p>Email: {registerData.email}</p>
-        <p>Password: {registerData.password}</p>
-      </div>
-      */}
     </PageWrapper>
   );
 }

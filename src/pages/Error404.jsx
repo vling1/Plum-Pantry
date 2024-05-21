@@ -23,14 +23,10 @@ export default function UserSettings() {
             is not looking for you.
           </p>
           <Link to="/">
-            <Button variant="info">
-              Take me to PlumPantry
-            </Button>
+            <Button variant="info">Take me to PlumPantry</Button>
           </Link>
         </div>
       </div>
-      {/* Meme? | Optional */}
-      {/* <img src="https://placehold.co/400" /> */}
     </PageWrapper>
   );
 }

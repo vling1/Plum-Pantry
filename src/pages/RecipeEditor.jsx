@@ -25,6 +25,10 @@ export default function RecipeEditor() {
 
   let username = "plumPantry_user";
 
+  if (isLoggedIn()) {
+    username = authInfo();
+  }
+
   let [searchParams, setSearchParams] = useSearchParams();
   console.log(searchParams);
 
@@ -131,13 +135,18 @@ export default function RecipeEditor() {
       if (recipeID) {
         const response = await api.get("/db/Recipes/recipe/" + recipeID);
 
+        let rating = response.data.rating;
+        if (rating % 0.5 == 0) {
+          rating -= 0.1;
+        }
+
         const recipe = {
           recipeTitle: formData.title,
           image: formData.image,
           cookTime: (parseInt(formData.hours) * 60) + parseInt(formData.minutes),
-          rating: response.data.rating + 0.1,
+          rating: rating,
           username: response.data.username,
-          isPublic: privacy == "true",
+          isPublic: privacy == "1",
           recipeTags: tagData,
           instructions: formData.instructions.split("\n"),
           ingredients: ingredients,
@@ -157,7 +166,7 @@ export default function RecipeEditor() {
           cookTime: (parseInt(formData.hours) * 60) + parseInt(formData.minutes),
           rating: 0.1,
           username: username,
-          isPublic: privacy == "true",
+          isPublic: privacy == "1",
           tags: tagData,
           instructions: formData.instructions.split("\n"),
           ingredients: ingredients,
@@ -195,18 +204,27 @@ export default function RecipeEditor() {
           hours: time[0].toString(),
           minutes: time[1].toString(),
         });
+
         setFile(response.data.image);
         setIngredientData(ingredients);
+
         if (response.data.recipeTags != null) {
           setTagData(response.data.recipeTags);
         }
-        setPrivacy(response.data.isPublic);
+
+        if (response.data.isPublic) {
+          setPrivacy("1");
+        } else {
+          setPrivacy("0");
+        }
+
       } else {
         console.error("Invalid response format:", response.data);
         navigate("/error404");
       }
     } catch (err) {
       console.error("Error fetching recipe:", err);
+      navigate("/error404");
     }
   };
 
@@ -229,8 +247,6 @@ export default function RecipeEditor() {
     // is rendered the first time
     if (!isLoggedIn()) {
       navigate("/error404")
-    } else {
-      username = authInfo();
     }
 
     if (recipeID) {
@@ -358,8 +374,8 @@ export default function RecipeEditor() {
                   onChange={(event) => setPrivacy(event.target.value)}
                   value={privacy}
                 >
-                  <option value={false}>Only me</option>
-                  <option value={true}>Anyone</option>
+                  <option value="0">Only me</option>
+                  <option value="1">Anyone</option>
                 </Form.Select>
               </Card.Body>
             </Card>
