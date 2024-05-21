@@ -2,7 +2,7 @@ import axios from "axios";
 import { useSearchParams } from "react-router-dom";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "http://plum-pantry.us-east-2.elasticbeanstalk.com",
 });
 
 export default class Data {
