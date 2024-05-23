@@ -5,7 +5,7 @@ import ChangeEmail from "../components/ChangeEmail.jsx";
 import ChangePassword from "../components/ChangePassword.jsx";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { isLoggedIn } from "../utils/auth.jsx";
+import { isLoggedIn } from "../services/authUtils.jsx";
 
 export default function UserSettings() {
   const navigate = useNavigate();

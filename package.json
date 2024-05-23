@@ -1,11 +1,12 @@
 {
+  "homepage": "https://vling1.github.io/Plum-Pantry",
   "name": "plum-pantry",
   "private": false,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "aws s3 cp --recursive ./build s3://plum-pantry",
+    "deploy": "gh-pages -d dist",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",

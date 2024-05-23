@@ -4,7 +4,7 @@ import FavoriteButton from "../components/FavoriteButton.jsx";
 import StarRating from "../components/StarRating.jsx";
 import icons from "./../icon-data.js";
 import { Link } from "react-router-dom";
-import { isLoggedIn } from "../utils/auth.jsx";
+import { isLoggedIn } from "../services/authUtils.jsx";
 
 // Returns a string in the form of "X h. Y min."
 export function timeFormat(minutes) {
@@ -49,8 +49,9 @@ export default function RecipeTile(props) {
               <Link to={"/editor/" + props.recipeId}>
                 <Button variant="warning">Edit</Button>
               </Link>
-            ) : (<></>)
-            }
+            ) : (
+              <></>
+            )}
             <Link to={"/view/" + props.recipeId}>
               <Button variant="primary">View</Button>
             </Link>

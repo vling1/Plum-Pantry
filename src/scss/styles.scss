@@ -112,15 +112,31 @@ body {
 
 .page-wrapper {
   background-color: $clr-main-100;
-  min-height: 100vh;
+
+  &__100vh {
+    min-height: 100vh;
+  }
+
+  &__container {
+    padding: 24px 12px 24px 12px;
+  }
 }
 
 .content-section-wrapper {
   background-color: $clr-main-50;
-  min-height: 100vh;
 }
 
 .recipe-tile {
+  &:hover {
+    transform: scale(1.03);
+    transition: transform 0.2s;
+  }
+
+  &:hover img {
+    transform: scale(1.03);
+    transition: transform 0.4s;
+  }
+
   &__img-wrapper {
     width: 100%;
 
@@ -135,9 +151,6 @@ body {
       height: 100%;
       object-fit: cover;
     }
-  }
-
-  &__header {
   }
 
   &__title {

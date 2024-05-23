@@ -4,7 +4,7 @@ import RecipeTile from "../components/RecipeTile.jsx";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import Data from "../services/Data.jsx";
 import { useState, useEffect } from "react";
-import { isLoggedIn, authInfo } from "../utils/auth.jsx";
+import { isLoggedIn, authInfo } from "../services/authUtils.jsx";
 
 import icons from "./../icon-data.js";
 
@@ -18,11 +18,11 @@ function getPageMaxNumber(dataArray) {
   if (!dataArray) return 1;
 
   let count = 0;
-  dataArray.forEach(item => {
+  dataArray.forEach((item) => {
     if (item.username == username) {
       count++;
     }
-  })
+  });
 
   return Math.max(1, Math.ceil(count / maxItemsOnPage));
 }
@@ -34,11 +34,11 @@ function getPageData(dataArray, pageNumber) {
   if (!dataArray) return [];
 
   let arr = [];
-  dataArray.forEach(item => {
+  dataArray.forEach((item) => {
     if (item.username == username) {
       arr.push(item);
     }
-  })
+  });
 
   if (arr.length <= maxItemsOnPage) return arr;
   else {
@@ -188,11 +188,13 @@ export default function Recipes() {
                 </div>
               </Link>
             </Col>
-            {getPageData(recipes, page).map((item) => (
+            {getPageData(recipes, page).map((item) =>
               item.username == username ? (
-              <RecipeTile {...item} key={item.recipeId} />
-            ) : (<></>)
-            ))}
+                <RecipeTile {...item} key={item.recipeId} />
+              ) : (
+                <></>
+              )
+            )}
           </Row>
         </Container>
       </section>

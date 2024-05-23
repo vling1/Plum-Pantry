@@ -3,8 +3,8 @@ import { ReactSVG } from "react-svg";
 import FavoriteButton from "../components/FavoriteButton.jsx";
 import StarRating from "../components/StarRating.jsx";
 import icons from "./../icon-data.js";
-import { Link } from "react-router-dom";
-import { isLoggedIn, authInfo } from "../utils/auth.jsx";
+import { Link, useNavigate } from "react-router-dom";
+import { authInfo } from "../services/authUtils.jsx";
 
 // Converts a numerical rating to an array of star icons
 function RatingToStars({ rating }) {
@@ -41,6 +41,7 @@ export function timeFormat(minutes) {
 }
 
 export default function RecipeTile(props) {
+  const navigate = useNavigate();
   return (
     <Col className="col-lg-3 col-md-4 col-sm-6 col-12">
       <Card className="recipe-tile" key={props.id}>
@@ -52,7 +53,10 @@ export default function RecipeTile(props) {
             <FavoriteButton />
           </div>
         </div>
-        <div className="recipe-tile__img-wrapper">
+        <div
+          className="recipe-tile__img-wrapper overflow-hidden"
+          onClick={() => navigate("/view/" + props.recipeId)}
+        >
           <Card.Img variant="middle" src={props.image} />
         </div>
         <Card.Body className="d-flex justify-content-between align-items-end">
@@ -68,14 +72,12 @@ export default function RecipeTile(props) {
             <StarRating rating={props.rating} />
           </div>
           <div className="d-flex flex-column gap-2">
-            {isLoggedIn() && (props.username == authInfo()) ? (
-              <Link to={"/editor/" + props.recipeId}>
-                <Button variant="warning">Edit</Button>
-              </Link>
-            ) : (<></>)
-            }
-            <Link to={"/view/" + props.recipeId}>
-              <Button variant="primary">View</Button>
+            <Link to={"/editor/" + props.recipeId}>
+              {authInfo() === props.username ? (
+                <Button className="icon-button" variant="warning">
+                  <ReactSVG src={icons.pencil} />
+                </Button>
+              ) : null}
             </Link>
           </div>
         </Card.Body>

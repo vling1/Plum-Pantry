@@ -11,6 +11,7 @@ import heartFull from "./assets/icons/heart-full.svg";
 import check from "./assets/icons/check.svg";
 import question from "./assets/icons/question.svg";
 import plus from "./assets/icons/plus-lg.svg";
+import pencil from "./assets/icons/pencil.svg";
 
 export default {
   arrowLeft: arrowLeft,
@@ -26,4 +27,5 @@ export default {
   check: check,
   question: question,
   plus: plus,
+  pencil: pencil,
 };

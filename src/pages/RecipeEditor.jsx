@@ -11,7 +11,7 @@ import Tag from "../components/Tag.jsx";
 import TagSelectionWidget from "../components/TagSelectionWidget.jsx";
 import TagMeasuringWidget from "../components/TagMeasuringWidget.jsx";
 import api from "../api/axiosConfig.jsx";
-import { isLoggedIn, authInfo } from "../utils/auth.jsx";
+import { isLoggedIn, authInfo } from "../services/authUtils.jsx";
 
 export default function RecipeEditor() {
   /*
@@ -23,21 +23,17 @@ export default function RecipeEditor() {
   let { recipeID } = useParams();
   const navigate = useNavigate();
 
-  let username = "plumPantry_user";
-
-  if (isLoggedIn()) {
-    username = authInfo();
-  }
+  let username = authInfo();
 
   let [searchParams, setSearchParams] = useSearchParams();
   console.log(searchParams);
 
   // validation check for cooking time
   function cookingTimeNotValid(time) {
-    if (time != "" && /^[0-9]+$/.test(time)) {
-      return false;
+    if (time != "") {
+      return !/^[0-9]+$/.test(time);
     }
-    return true;
+    return false;
   }
 
   // function format minutes into hours and minutes
@@ -74,6 +70,7 @@ export default function RecipeEditor() {
     instructions: false,
     hours: false,
     minutes: false,
+    ingredients: false,
   });
   const [file, setFile] = useState("");
   const [privacy, setPrivacy] = useState();
@@ -98,8 +95,14 @@ export default function RecipeEditor() {
     notValid.instructions = formData.instructions == "";
     notValid.hours = cookingTimeNotValid(formData.hours);
     notValid.minutes = cookingTimeNotValid(formData.minutes);
+    notValid.ingredients = ingredientData.length <= 0;
 
-    if (parseInt(formData.hours) == 0 && parseInt(formData.minutes) == 0) {
+    if (
+      (formData.hours == "" && formData.minutes == "") ||
+      (formData.hours == "0" && formData.minutes == "") ||
+      (formData.hours == "" && formData.minutes == "0") ||
+      (formData.hours == "0" && formData.minutes == "0")
+    ) {
       notValid.hours = true;
       notValid.minutes = true;
     }
@@ -110,7 +113,8 @@ export default function RecipeEditor() {
       notValid.title ||
       notValid.instructions ||
       notValid.hours ||
-      notValid.minutes
+      notValid.minutes ||
+      notValid.ingredients
     ) {
       event.preventDefault();
       event.stopPropagation();
@@ -120,8 +124,6 @@ export default function RecipeEditor() {
     }
   };
 
-  
-
   // send data to database for creating or updating recipe
   const createOrUpdateRecipe = async () => {
     try {
@@ -129,11 +131,14 @@ export default function RecipeEditor() {
 
       let ingrData = ingredientData.map((item) => ({
         k: item.tag,
-        v: item.measure,
+        v: item.measure == "" ? "1 piece" : item.measure,
       }));
 
       if (recipeID) {
         const response = await api.get("/db/Recipes/recipe/" + recipeID);
+
+        let hours = formData.hours == "" ? 0 : parseInt(formData.hours);
+        let minutes = formData.minutes == "" ? 0 : parseInt(formData.minutes);
 
         let rating = response.data.rating;
         if (rating % 0.5 == 0) {
@@ -143,7 +148,7 @@ export default function RecipeEditor() {
         const recipe = {
           recipeTitle: formData.title,
           image: formData.image,
-          cookTime: (parseInt(formData.hours) * 60) + parseInt(formData.minutes),
+          cookTime: hours * 60 + minutes,
           rating: rating,
           username: response.data.username,
           isPublic: privacy == "1",
@@ -152,18 +157,23 @@ export default function RecipeEditor() {
           ingredients: ingredients,
           measDescr: ingrData,
         };
-        
-        api.put("/db/Recipes/update/" + recipeID, recipe).then((response) => {
-          console.log(response.data);
-        }).catch(error => {
-          console.error(error);
-        })
 
+        api
+          .put("/db/Recipes/update/" + recipeID, recipe)
+          .then((response) => {
+            console.log(response.data);
+          })
+          .catch((error) => {
+            console.error(error);
+          });
       } else {
+        let hours = formData.hours == "" ? 0 : parseInt(formData.hours);
+        let minutes = formData.minutes == "" ? 0 : parseInt(formData.minutes);
+
         const recipe = {
           recipeTitle: formData.title,
           image: formData.image,
-          cookTime: (parseInt(formData.hours) * 60) + parseInt(formData.minutes),
+          cookTime: hours * 60 + minutes,
           rating: 0.1,
           username: username,
           isPublic: privacy == "1",
@@ -175,7 +185,7 @@ export default function RecipeEditor() {
 
         try {
           let result = await api.post("/db/Recipes", recipe);
-          console.log(result.response.data)
+          console.log(result.response.data);
         } catch (error) {
           console.error(error.response.data);
         }
@@ -217,7 +227,6 @@ export default function RecipeEditor() {
         } else {
           setPrivacy("0");
         }
-
       } else {
         console.error("Invalid response format:", response.data);
         navigate("/error404");
@@ -246,7 +255,7 @@ export default function RecipeEditor() {
     // This code happens only once when the page
     // is rendered the first time
     if (!isLoggedIn()) {
-      navigate("/error404")
+      navigate("/error404");
     }
 
     if (recipeID) {
@@ -353,6 +362,7 @@ export default function RecipeEditor() {
                     ingredientData,
                     setIngredientData,
                   ]}
+                  ingredientIsEmpty={notValid.ingredients}
                 />
               </Card.Body>
             </Card>

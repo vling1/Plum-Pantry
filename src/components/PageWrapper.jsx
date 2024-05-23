@@ -11,23 +11,34 @@ export default function PageWrapper({
   showSearchBar = "true",
   showGlobalRecipeSearch = "false",
   searchQueryHook,
+  tagQueryHook,
+  sortModeHook,
 }) {
   return (
     <div className="page-wrapper">
-      <Header showSearchBar={showSearchBar} />
-      {/* Global search display */}
-      {showGlobalRecipeSearch == "true" ? (
-        <GlobalRecipeSearch searchQueryHook={searchQueryHook} />
-      ) : null}
-      <Container
-        fluid="xxl"
-        className={
-          "pt-4 pb-4 " +
-          (showBackground == "true" ? "content-section-wrapper" : "")
-        }
-      >
-        {children}
-      </Container>
+      <div className="page-wrapper__100vh d-flex flex-column">
+        <Header showSearchBar={showSearchBar} />
+        {/* Global search display */}
+        {showGlobalRecipeSearch == "true" ? (
+          <GlobalRecipeSearch
+            // Sending hooks to connect Recipes and GlobalRecipeSearch
+            searchQueryHook={searchQueryHook}
+            tagQueryHook={tagQueryHook}
+            sortModeHook={sortModeHook}
+          />
+        ) : null}
+        <div className="flex-grow-1 d-flex justify-content-center h-100 m-0 p-0">
+          <Container
+            fluid="xxl"
+            className={
+              "m-0 page-wrapper__container " +
+              (showBackground == "true" ? "content-section-wrapper" : "")
+            }
+          >
+            {children}
+          </Container>
+        </div>
+      </div>
       <Footer />
     </div>
   );

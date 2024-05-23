@@ -2,7 +2,7 @@ import PageWrapper from "./../components/PageWrapper.jsx";
 import { Button, Card, Container, Form, Modal, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { authLogin } from "../utils/auth.jsx";
+import { authRegister } from "../services/authUtils.jsx";
 
 export default function Register() {
   //Handle Validation
@@ -19,16 +19,25 @@ export default function Register() {
 
     //display register info
     else {
-      alert(
+      /* alert(
         `Username: ${registerData.username}
         Email: ${registerData.email}
         Password: ${registerData.password}`
-      );
+      ); */
     }
     setValidated(true);
     if (form.checkValidity() === true) {
-      authLogin(registerData.username);
-      navigate("/");
+      authRegister({
+        username: registerData.username,
+        email: registerData.email,
+        password: registerData.password,
+      }).then((response) => {
+        console.log("REGISTRATION MESSAGE", response);
+        // Successful registration
+        if (response.username) navigate("/");
+        // Failed registration
+        else alert(response.errMessage);
+      });
     }
   };
 
@@ -46,7 +55,7 @@ export default function Register() {
 
   return (
     <PageWrapper showBackground="false">
-      <div className="d-flex vh-100 justify-content-center align-items-center">
+      <div className="d-flex h-100 justify-content-center align-items-center pb-5">
         <Card className="text-center w-300 col-md-3" border="dark">
           <Card.Body>
             <Card.Title>

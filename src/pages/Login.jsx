@@ -2,7 +2,7 @@ import PageWrapper from "./../components/PageWrapper.jsx";
 import { Button, Card, Container, Form, Modal, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { authLogin } from "../utils/auth.jsx";
+import { authLogin } from "../services/authUtils.jsx";
 
 export default function Login() {
   //Handle Validation
@@ -19,16 +19,22 @@ export default function Login() {
 
     //display login info
     else {
-      alert(
+      /* alert(
         `Email: ${loginData.email}
       Password: ${loginData.password}`
-      );
+      ); */
     }
     setValidated(true);
 
     if (form.checkValidity() === true) {
-      authLogin(loginData.email);
-      navigate("/");
+      authLogin({ login: loginData.email, password: loginData.password }).then(
+        (response) => {
+          // Successful login
+          if (response) navigate("/");
+          // Failed login
+          else alert("Wrong username/email or password");
+        }
+      );
     }
   };
 
@@ -41,7 +47,7 @@ export default function Login() {
 
   return (
     <PageWrapper showBackground="false">
-      <div className="d-flex vh-100 justify-content-center align-items-center">
+      <div className="d-flex h-100 justify-content-center align-items-center pb-5">
         <Card className="text-center w-300" border="dark">
           <Card.Body>
             <Card.Title>

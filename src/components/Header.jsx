@@ -2,9 +2,8 @@ import { Button, Container, Form, Nav, Navbar } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import headerLogo from "./../assets/logo/logo-small.webp";
 import Dropdown from "react-bootstrap/Dropdown";
-import { authInfo, authLogout } from "./../utils/auth.jsx";
+import { authInfo, authLogout } from "../services/authUtils.jsx";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 export default function Header({ showSearchBar = "true" }) {
   const [username, setUsername] = useState(authInfo());
@@ -51,9 +50,8 @@ export default function Header({ showSearchBar = "true" }) {
           // Logged In
           <Nav className="flex-row gap-1 mt-2 mt-lg-0 ms-0 ms-lg-4 nagivation-bar__right-buttons">
             <Dropdown>
-              <Dropdown.Toggle>My Account </Dropdown.Toggle>
-              <Dropdown.Menu style={{ minWidth: "120px" }}>
-                <Dropdown.Item>{username}</Dropdown.Item>
+              <Dropdown.Toggle>{username}</Dropdown.Toggle>
+              <Dropdown.Menu style={{ minWidth: "120px" }} align={{lg: 'end'}}>
                 <Dropdown.Item>
                   <Link className="no-style-link" to="/settings">
                     Settings
@@ -64,7 +62,7 @@ export default function Header({ showSearchBar = "true" }) {
                     My Recipes
                   </Link>
                 </Dropdown.Item>
-                <Dropdown.Item>
+                <Dropdown.Item onClick={() => window.location.reload()}>
                   <Link className="no-style-link" to="/editor">
                     New Recipe
                   </Link>

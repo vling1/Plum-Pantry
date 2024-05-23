@@ -9,6 +9,7 @@ const maxSuggestionsLength = 10;
 export default function TagMeasuringWidget({
   tagColor = "blue",
   selectedIngredientsHook,
+  ingredientIsEmpty
 }) {
   // Removes an ingredients by name from the list of selected ingredients
   function removeIngredient(tag) {
@@ -97,7 +98,7 @@ export default function TagMeasuringWidget({
   return (
     <div className="position-relative tag-measuring-widget">
       {/* Text input */}
-      <input
+      <Form.Control
         placeholder="Add ingredients"
         className={
           "form-control tag-measuring-widget__input " +
@@ -109,6 +110,7 @@ export default function TagMeasuringWidget({
         onBlur={() => setIsFocused(false)}
         value={tagSearchInput}
         onChange={(event) => setTagSearchInput(event.target.value)}
+        isInvalid={ingredientIsEmpty}
       />
       {/* Dropdown block */}
       {isFocused ? (
@@ -150,6 +152,7 @@ export default function TagMeasuringWidget({
                   const measure = event.target.value;
                   updateIngredient({ tag: ingr.tag, measure: measure });
                 }}
+                isInvalid={ingr.measure == ""}
               />
             </div>
           ))}

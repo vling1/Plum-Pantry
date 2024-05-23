@@ -9,7 +9,11 @@ import Data from "../services/Data.jsx";
 // If lesser number of tags appear in a category, we merge it with other categories
 const categoryMinTags = 20;
 
-export default function GlobalRecipeSearch({ searchQueryHook = null }) {
+export default function GlobalRecipeSearch({
+  searchQueryHook = null,
+  sortModeHook = null,
+  tagQueryHook = null,
+}) {
   // Removes a tag by ID from the list of selected tags
   function removeTag(tagID) {
     setSelectedTags((prevTags) => prevTags.filter((item) => item.id != tagID));
@@ -172,6 +176,7 @@ export default function GlobalRecipeSearch({ searchQueryHook = null }) {
 
     let newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("search", textSearchInput);
+    newSearchParams.set("page", 1);
     newSearchParams.set(
       "tags",
       selectedTags.map((item) =>
@@ -188,7 +193,12 @@ export default function GlobalRecipeSearch({ searchQueryHook = null }) {
     if (advancedSearchToggle) newSearchParams.set("advancedMode", "true");
     if (whatsInTheFridgeToggle) newSearchParams.set("fridgeMode", "true");
     if (mainSort) newSearchParams.set("sort", mainSort);
-    // Passing search query to the recipe listing page with the hook
+    // Passing tag query to the recipe listing page
+    if (tagQueryHook) {
+      const [tagQuery, setTagQuery] = tagQueryHook();
+      setTagQuery(selectedTags);
+    }
+    // Passing search query to the recipe listing page
     if (searchQueryHook) {
       const [searchQuery, setSearchQuery] = searchQueryHook();
       setSearchQuery(textSearchInput);
@@ -200,7 +210,9 @@ export default function GlobalRecipeSearch({ searchQueryHook = null }) {
   const [advancedSearchToggle, setAdvancedSearchToggle] = useState(false);
   const [whatsInTheFridgeToggle, setWhatsInTheFridgeToggle] = useState(false);
   const [selectedTags, setSelectedTags] = useState([]);
-  const [mainSort, setMainSort] = useState("alphabetical");
+  const [mainSort, setMainSort] = sortModeHook
+    ? sortModeHook()
+    : useState("alphabetical");
   const [tagSort, setTagSort] = useState("alphabetical");
   const [tagSearchInput, setTagSearchInput] = useState("");
   const [textSearchInput, setTextSearchInput] = useState("");
@@ -215,7 +227,6 @@ export default function GlobalRecipeSearch({ searchQueryHook = null }) {
   //Fetching tags and ingredients then merging them into allTags
   let areTagsFetched = false;
   useEffect(() => {
-    console.log("ONE CALL!");
     if (!areTagsFetched) {
       Data.get("Ingredients").then((response) => {
         const addedData = response
@@ -255,12 +266,17 @@ export default function GlobalRecipeSearch({ searchQueryHook = null }) {
           // Category
           const c = tagJson?.c;
           const newTag = allTags.find(
-            (item) => item.name == n && item.category == c
+            (item) => item.name === tagJson.n && item.category === tagJson.c
           );
           // Adding tag if we found it
           if (newTag) addTag(newTag.id);
         });
-    setTextSearchInput(searchParams.get("search") ?? "");
+    const [searchQuery, setSearchQuery] = searchQueryHook();
+    let query = searchParams.get("search");
+    if (query === null) query = "";
+    setTextSearchInput(query);
+    // Sending freshly updated search query to the recipe listing page
+    setSearchQuery(query);
     if (searchParams.get("advancedMode") == "true")
       setAdvancedSearchToggle(true);
     if (searchParams.get("fridgeMode") == "true")
@@ -273,10 +289,7 @@ export default function GlobalRecipeSearch({ searchQueryHook = null }) {
     )
       setMainSort(sortType);
     else setMainSort("alphabetical");
-    console.log("TWO CALL!");
   }, [allTags]);
-
-  console.log("allTags", allTags);
 
   return (
     <section className="d-flex global-recipe-search flex-column">

@@ -1,8 +1,7 @@
 import axios from "axios";
-import { useSearchParams } from "react-router-dom";
 
 const api = axios.create({
-  baseURL: "http://plum-pantry.us-east-2.elasticbeanstalk.com",
+  baseURL: "http://localhost:8080",
 });
 
 export default class Data {
@@ -35,9 +34,10 @@ export default class Data {
   }
 
   // Sorting recipe data
-  static sortRecipes(recipes, sortMode = null, query = null) {
+  static sortRecipes(recipes, sortMode = null, query = null, tags = null) {
     console.log("RECIPES DATA:", recipes);
     console.log("sortmode:", sortMode);
+    console.log("Sorting by query: ", query);
     // Setting default value ("alphabetical") in case
     // any non-valid value is found
     if (
@@ -48,6 +48,7 @@ export default class Data {
       sortMode = "alphabetical";
     console.log("Sort mode:", sortMode);
 
+    // sort mode application
     switch (sortMode) {
       case "alphabetical":
         recipes.sort((a, b) => {
@@ -62,12 +63,37 @@ export default class Data {
       case "favorite":
         break;
     }
-    if (!query) return recipes;
-    else {
+    // text query filtering
+    if (query) {
       query = query.trim().toLowerCase();
       recipes = recipes.filter((item) =>
         item.recipeTitle.toLowerCase().includes(query)
       );
+    }
+    // tag query filtering
+    if (tags) {
+      recipes = recipes.filter((item) => {
+        let matchingTags = 0;
+        tags.forEach((tag) => {
+          if (tag.category == "Ingredients")
+            if (
+              item.ingredients.find(
+                (item) => item.toLowerCase() == tag.name.toLowerCase()
+              )
+            )
+              matchingTags++;
+          if (tag.category == "Tags")
+            if (
+              item.recipeTags.find(
+                (item) => item.toLowerCase() == tag.name.toLowerCase()
+              )
+            )
+              matchingTags++;
+        });
+        console.log("Matching", matchingTags);
+        // If all tags were found, we that's a matching recipe
+        return matchingTags === tags.length;
+      });
     }
     return recipes;
   }
