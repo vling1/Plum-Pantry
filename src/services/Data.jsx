@@ -1,4 +1,5 @@
 import axios from "axios";
+import { authInfo } from "./authUtils";
 
 const api = axios.create({
   baseURL: "http://localhost:8080",
@@ -73,6 +74,11 @@ export default class Data {
     if (username) {
       recipes = recipes.filter((item) => item.username === username);
     }
+    // privacy filtering
+    const currentUser = authInfo() || "";
+    recipes = recipes.filter(
+      (item) => item.isPublic || item.username === currentUser
+    );
     // text query filtering
     if (query) {
       query = query.trim().toLowerCase();
