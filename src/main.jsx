@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import Homepage from "./pages/Homepage.jsx";
 import Recipes from "./pages/Recipes.jsx";
-import MyRecipes from "./pages/MyRecipes.jsx";
 import About from "./pages/About.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -25,7 +24,11 @@ const router = createHashRouter ([
   },
   {
     path: "/recipes/",
-    element: <Recipes />,
+    element: <Recipes type="public" />,
+  },
+  {
+    path: "/myrecipes",
+    element: <Recipes type="private" />,
   },
   {
     path: "/about",
@@ -58,10 +61,6 @@ const router = createHashRouter ([
   {
     path: "/editor/:recipeID",
     element: <RecipeEditor />,
-  },
-  {
-    path: "/myrecipes",
-    element: <MyRecipes />,
   },
   {
     path: "/BKNDTest/",

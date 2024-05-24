@@ -172,6 +172,26 @@ body {
   }
 }
 
+.new-recipe-tile {
+  background-color: $clr-main-200;
+
+  &:hover .new-recipe-tile__content {
+    transform: scale(1.05);
+    transition: transform 0.2s;
+  }
+
+  &__dash-box {
+    border: 2px dashed $clr-main-900;
+  }
+
+  &__icon-wrapper {
+    svg {
+      width: 60px;
+      height: 60px;
+    }
+  }
+}
+
 .favorite-button {
   border: none !important;
   padding: 1rem;

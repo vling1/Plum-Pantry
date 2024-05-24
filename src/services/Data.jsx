@@ -34,7 +34,13 @@ export default class Data {
   }
 
   // Sorting recipe data
-  static sortRecipes(recipes, sortMode = null, query = null, tags = null) {
+  static sortRecipes({
+    recipes,
+    sortMode = null,
+    query = null,
+    tags = null,
+    username = null,
+  }) {
     console.log("RECIPES DATA:", recipes);
     console.log("sortmode:", sortMode);
     console.log("Sorting by query: ", query);
@@ -62,6 +68,10 @@ export default class Data {
         break;
       case "favorite":
         break;
+    }
+    // user filtering
+    if (username) {
+      recipes = recipes.filter((item) => item.username === username);
     }
     // text query filtering
     if (query) {
