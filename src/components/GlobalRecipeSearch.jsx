@@ -1,10 +1,11 @@
 import { Form, Button } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { ReactSVG } from "react-svg";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import Tag from "./../components/Tag.jsx";
 import icons from "./../icon-data.js";
 import Data from "../services/Data.jsx";
+import { authInfo } from "../services/authUtils.jsx";
 
 // If lesser number of tags appear in a category, we merge it with other categories
 const categoryMinTags = 20;
@@ -13,6 +14,7 @@ export default function GlobalRecipeSearch({
   searchQueryHook = null,
   sortModeHook = null,
   tagQueryHook = null,
+  fridgeModeHook = null,
 }) {
   // Removes a tag by ID from the list of selected tags
   function removeTag(tagID) {
@@ -20,13 +22,14 @@ export default function GlobalRecipeSearch({
   }
 
   // Add a tag by name to the list of selected tags
-  function addTag(tagID) {
+  async function addTag(tagID, tagAddedCallback = null) {
     setSelectedTags((prevTags) => {
       if (
         prevTags.every((item) => item.id != tagID) &&
         allTags.some((item) => item.id == tagID)
       ) {
         const addedTag = allTags.find((item) => item.id == tagID);
+        if (tagAddedCallback) tagAddedCallback(addedTag);
         return [...prevTags, addedTag];
       }
       return prevTags;
@@ -173,6 +176,8 @@ export default function GlobalRecipeSearch({
   // This function is redirecting to a recipe listing page with a new search query in the URL
   function handleSearchSubmit(event) {
     event.preventDefault();
+    // Collapsing the advanced tag menu as a QoL feature
+    setAdvancedSearchToggle(false);
 
     let newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set("search", textSearchInput);
@@ -191,18 +196,27 @@ export default function GlobalRecipeSearch({
       ) // Serializing
     );
     if (advancedSearchToggle) newSearchParams.set("advancedMode", "true");
+    else newSearchParams.set("advancedMode", "false");
     if (whatsInTheFridgeToggle) newSearchParams.set("fridgeMode", "true");
+    else newSearchParams.set("fridgeMode", "false");
     if (mainSort) newSearchParams.set("sort", mainSort);
     // Passing tag query to the recipe listing page
     if (tagQueryHook) {
-      const [tagQuery, setTagQuery] = tagQueryHook();
+      const [tagQuery, setTagQuery] = tagQueryHook
+        ? tagQueryHook()
+        : useEffect();
       setTagQuery(selectedTags);
     }
     // Passing search query to the recipe listing page
     if (searchQueryHook) {
       const [searchQuery, setSearchQuery] = searchQueryHook();
       setSearchQuery(textSearchInput);
-      navigate("/recipes?" + newSearchParams.toString());
+      navigate(location.pathname + "?" + newSearchParams.toString());
+    }
+    // Passing the information about "What's in the fridge?" mode
+    if (searchQueryHook) {
+      const [fridgeMode, setFridgeMode] = fridgeModeHook();
+      setFridgeMode(whatsInTheFridgeToggle);
     }
   }
   const navigate = useNavigate();
@@ -218,7 +232,6 @@ export default function GlobalRecipeSearch({
   const [textSearchInput, setTextSearchInput] = useState("");
   // allTags contain objects of type: {name: "NAME", category: "CATEGORY"}
   const [allTags, setAllTags] = useState([]);
-
   const selectedTagColor = whatsInTheFridgeToggle ? "yellow" : "green";
   const selectedTagIcon = whatsInTheFridgeToggle ? "question" : "check";
 
@@ -254,7 +267,9 @@ export default function GlobalRecipeSearch({
 
   //Pre-selecting tags and inputting the text search query in the form
   useEffect(() => {
-    if (searchParams.get("tags"))
+    if (!allTags) return;
+    const [tagQuery, setTagQuery] = tagQueryHook ? tagQueryHook() : useState();
+    if (searchParams.get("tags")) {
       searchParams
         .get("tags")
         .split(",")
@@ -269,18 +284,43 @@ export default function GlobalRecipeSearch({
             (item) => item.name === tagJson.n && item.category === tagJson.c
           );
           // Adding tag if we found it
-          if (newTag) addTag(newTag.id);
+          if (newTag)
+            addTag(newTag.id, (addedTag) => {
+              if (tagQueryHook) {
+                setTagQuery((prevTags) => {
+                  if (!prevTags) return [];
+                  if (prevTags.includes(addedTag)) return prevTags;
+                  else return [addedTag, ...prevTags];
+                });
+              }
+            });
         });
+    }
+    // In case to tags are passed in the URL
+    if (!tagQuery) {
+      setTagQuery([]);
+    }
     const [searchQuery, setSearchQuery] = searchQueryHook();
     let query = searchParams.get("search");
     if (query === null) query = "";
     setTextSearchInput(query);
+    setAdvancedSearchToggle(false);
     // Sending freshly updated search query to the recipe listing page
     setSearchQuery(query);
-    if (searchParams.get("advancedMode") == "true")
-      setAdvancedSearchToggle(true);
-    if (searchParams.get("fridgeMode") == "true")
+
+    const [fridgeMode, setFridgeMode] = fridgeModeHook
+      ? fridgeModeHook()
+      : useState(false);
+    setFridgeMode();
+    // Sending information about the fridgeMode mode to the recipe listing page
+    if (searchParams.get("fridgeMode") == "true") {
       setWhatsInTheFridgeToggle(true);
+      setFridgeMode(true);
+    } else {
+      setWhatsInTheFridgeToggle(false);
+      setFridgeMode(false);
+    }
+
     const sortType = searchParams.get("sort");
     if (
       sortType == "alphabetical" ||
@@ -291,18 +331,18 @@ export default function GlobalRecipeSearch({
     else setMainSort("alphabetical");
   }, [allTags]);
 
+  const location = useLocation();
+  // Used for button styles
+  const [fridgeMode, setFridgeMode] = fridgeModeHook();
+
   return (
     <section className="d-flex global-recipe-search flex-column">
       {/* ========== Search bar section ========== */}
       <section className="d-flex align-items-end justify-content-between w-100 text-nowrap px-3 px-lg-4 py-2">
         <Button
+          className={whatsInTheFridgeToggle ? "btn-warning" : null}
           onClick={() => {
-            if (advancedSearchToggle)
-              setWhatsInTheFridgeToggle(!whatsInTheFridgeToggle);
-            else {
-              setWhatsInTheFridgeToggle(true);
-              setAdvancedSearchToggle(true);
-            }
+            setWhatsInTheFridgeToggle(!whatsInTheFridgeToggle);
           }}
         >
           What's in the fridge?
@@ -326,22 +366,38 @@ export default function GlobalRecipeSearch({
                 Search
               </Button>
             </Form>
-            <Button onClick={() => setMainSort("alphabetical")}>A-Z</Button>
             <Button
-              className="icon-button"
+              className={
+                "icon-button fill-white " +
+                (mainSort == "alphabetical" ? "active " : null)
+              }
+              onClick={() => setMainSort("alphabetical")}
+            >
+              A-Z
+            </Button>
+            <Button
+              className={
+                "icon-button fill-white " +
+                (mainSort == "rating" ? "active " : null)
+              }
               onClick={() => setMainSort("rating")}
             >
               <ReactSVG src={icons.starFull} />
             </Button>
-            <Button
-              className="icon-button"
-              onClick={() => setMainSort("favorite")}
-            >
-              <ReactSVG src={icons.heartFull} />
-            </Button>
+            {authInfo() ? (
+              <Button
+                className={
+                  "icon-button fill-white " +
+                  (mainSort == "favorite" ? "active " : null)
+                }
+                onClick={() => setMainSort("favorite")}
+              >
+                <ReactSVG src={icons.heartFull} />
+              </Button>
+            ) : null}
           </div>
           {/* Selected tags section */}
-          {advancedSearchToggle && selectedTags.length > 0 ? (
+          {selectedTags.length > 0 ? (
             <div className="d-flex gap-1 flex-wrap pt-2">
               {selectedTags.map((item) => (
                 <Tag
@@ -356,7 +412,7 @@ export default function GlobalRecipeSearch({
           ) : null}
         </div>
         <Button
-          className="text-nowrap"
+          className={"text-nowrap" + (advancedSearchToggle ? " active" : null)}
           onClick={() => {
             setAdvancedSearchToggle(!advancedSearchToggle);
           }}
@@ -380,9 +436,20 @@ export default function GlobalRecipeSearch({
                   onChange={(event) => setTagSearchInput(event.target.value)}
                 />
               </Form>
-              <Button onClick={() => setTagSort("alphabetical")}>A-Z</Button>
               <Button
-                className="icon-button"
+                className={
+                  "btn icon-button" +
+                  (tagSort == "alphabetical" ? " active" : null)
+                }
+                onClick={() => setTagSort("alphabetical")}
+              >
+                A-Z
+              </Button>
+              <Button
+                className={
+                  "btn icon-button" +
+                  (tagSort == "categories" ? " active" : null)
+                }
                 onClick={() => setTagSort("categories")}
               >
                 Category

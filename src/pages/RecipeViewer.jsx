@@ -9,6 +9,8 @@ import StarRating from "../components/StarRating.jsx";
 import { useEffect, useState } from "react";
 import api from "../api/axiosConfig.jsx";
 import { timeFormat } from "../components/RecipeTile.jsx";
+import StarRatingSelection from "../components/StarRatingSelection.jsx";
+import { authInfo } from "../services/authUtils.jsx";
 
 export default function RecipeViewer() {
   /*
@@ -59,7 +61,9 @@ export default function RecipeViewer() {
                 <h3 className="text-center p-0 m-0">{recipe.recipeTitle}</h3>
               </Card.Body>
               <Card.Body className="col-2 text-end">
-                <FavoriteButton />
+                {recipe.recipeId ? (
+                  <FavoriteButton recipeId={recipe.recipeId} />
+                ) : null}
               </Card.Body>
             </div>
           </Card.Header>
@@ -125,7 +129,8 @@ export default function RecipeViewer() {
               {/* Function to test formatting*/}
               {recipe.measDescr?.map((measure) => (
                 <div className="d-flex justify-content-between align-items-center mb-2">
-                  <Tag icon="none">{measure.k}</Tag>{measure.v}
+                  <Tag icon="none">{measure.k}</Tag>
+                  {measure.v}
                 </div>
               ))}
             </Card.Body>
@@ -135,11 +140,8 @@ export default function RecipeViewer() {
 
       {/* "Rate this recipe" (only for registered users) */}
       <div className="d-flex justify-content-center">
-        <div className="col-md-10">
-          <div className="star-rating__icons d-flex justify-content-start">
-            <h5 className="me-2">Rate this recipe: </h5>
-            <StarRating rating={5} />
-          </div>
+        <div className="col-md-10 mb-4">
+          {authInfo() ? <StarRatingSelection recipeId={recipeID} /> : null}
         </div>
       </div>
     </PageWrapper>

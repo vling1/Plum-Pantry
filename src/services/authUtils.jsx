@@ -1,4 +1,8 @@
 import Data from "./Data";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const loginPage = "/login";
+const defaultPage = "/";
 
 // Function to check if the user is logged in
 // Helps to redirect users
@@ -15,9 +19,39 @@ export function authLogout() {
   setCookie("username", "", 0);
 }
 
+// Checks given condition (be default, it check for being logged in)
+// If the check was passed, continue. If not, navigate to the login page
+// Note:
+export function authEnforce(check = isLoggedIn) {
+  if (check()) return;
+  // Auth check failed
+  const location = useLocation();
+  const URL = location.pathname + location.search;
+  const navigate = useNavigate();
+  navigate(loginPage, { state: { from: URL } });
+}
+
+// This function works in tandem with authEnforce(): it navgates user
+// to the last private page they tried to access before authEnforce()
+// was called.
+export function authResolve() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const targetPage = location.state?.from || defaultPage;
+  navigate(targetPage, { state: { from: URL } });
+}
+
 // Tries to log in with given credentials
 // Returns username or null
-export async function authLogin({ login = null, password = null }) {
+export async function authLogin({
+  login = null,
+  password = null,
+  ignoreServer = false,
+}) {
+  if (ignoreServer) {
+    setCookie("username", login, 1);
+    return;
+  }
   let foundUsername = null;
   try {
     await Data.get("Users").then((response) => {
@@ -52,7 +86,7 @@ export async function authRegister({
   let newUsername = null;
   let errMessage = null;
   try {
-    await Data.set("Users", userData).then((response) => {
+    await Data.post("Users", userData).then((response) => {
       if (response) {
         console.log("response", response);
         newUsername = response?.data?.username;

@@ -13,6 +13,7 @@ export default function PageWrapper({
   searchQueryHook,
   tagQueryHook,
   sortModeHook,
+  fridgeModeHook,
 }) {
   return (
     <div className="page-wrapper">
@@ -25,6 +26,7 @@ export default function PageWrapper({
             searchQueryHook={searchQueryHook}
             tagQueryHook={tagQueryHook}
             sortModeHook={sortModeHook}
+            fridgeModeHook={fridgeModeHook}
           />
         ) : null}
         <div className="flex-grow-1 d-flex justify-content-center h-100 m-0 p-0">

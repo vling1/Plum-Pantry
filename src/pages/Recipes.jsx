@@ -41,7 +41,8 @@ export default function Recipes({ type = "public" }) {
   const [recipes, setRecipes] = useState([]);
   const [searchQuery, setSearchQuery] = useState(null);
   const [sortMode, setSortMode] = useState("alphabetical");
-  const [tagQuery, setTagQuery] = useState([]);
+  const [tagQuery, setTagQuery] = useState(null);
+  const [fridgeMode, setFridgeMode] = useState(null);
   // This state is here so that switching from recipes to myrecipes
   // and vice versa is recognized
   const [pageType, setPageType] = useState();
@@ -51,41 +52,47 @@ export default function Recipes({ type = "public" }) {
 
   // ======== FILTERING RECIPES FOR DISPLAY ========
   useEffect(() => {
-    if (searchQuery === null) return; // Prevents racing condition
-    let username = null;
-    if (type == "private") {
-      username = authInfo();
-    }
-    Data.get("Recipes").then((response) => {
-      // Note: we push "NewRecipeTile" string as the first element on the
-      // private version of the recipe listing page to mark a place where this
-      // component must be displayed
-      if (pageType === "private")
-        setRecipes([
-          "NewRecipeTile",
-          ...Data.sortRecipes({
-            recipes: response,
-            sortMode: sortMode,
-            query: searchQuery,
-            tags: tagQuery,
-            username: username,
-          }),
-        ]);
-      else
-        setRecipes(
-          Data.sortRecipes({
-            recipes: response,
-            sortMode: sortMode,
-            query: searchQuery,
-            tags: tagQuery,
-            username: username,
-          })
-        );
-    });
+    console.log("tagQuery", tagQuery);
+    if (searchQuery === null || tagQuery === null || fridgeMode === null)
+      return; // Prevents racing condition
+    const username = authInfo();
+    Data.get(username ? "Users/" + username : "").then((userData) =>
+      Data.get("Recipes").then((response) => {
+        // Note: we push "NewRecipeTile" string as the first element on the
+        // private version of the recipe listing page to mark a place where this
+        // component must be displayed
+        if (!response) return;
+        if (pageType === "private")
+          setRecipes([
+            "NewRecipeTile",
+            ...Data.sortRecipes({
+              recipes: response,
+              sortMode: sortMode,
+              fridgeMode: fridgeMode,
+              query: searchQuery,
+              tags: tagQuery,
+              username: username,
+              favorite: userData?.favoriteRecipes,
+            }),
+          ]);
+        else
+          setRecipes(
+            Data.sortRecipes({
+              recipes: response,
+              sortMode: sortMode,
+              fridgeMode: fridgeMode,
+              query: searchQuery,
+              tags: tagQuery,
+              username: null,
+              favorite: userData?.favoriteRecipes,
+            })
+          );
+      })
+    );
 
     console.log("searchQuery", searchQuery);
     console.log("tagQuery", tagQuery);
-  }, [searchQuery, sortMode, tagQuery, pageType]);
+  }, [searchQuery, sortMode, tagQuery, pageType, fridgeMode]);
 
   pageMax = getPageMaxNumber(recipes);
 
@@ -110,6 +117,7 @@ export default function Recipes({ type = "public" }) {
       searchQueryHook={() => [searchQuery, setSearchQuery]}
       tagQueryHook={() => [tagQuery, setTagQuery]}
       sortModeHook={() => [sortMode, setSortMode]}
+      fridgeModeHook={() => [fridgeMode, setFridgeMode]}
     >
       {/* =========== Recipe tiles =========== */}
       <section className="d-flex mb-4 recipe-suggestion-section">

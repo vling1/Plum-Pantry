@@ -19,29 +19,41 @@ $md: 768px;
 $lg: 992px;
 $xl: 1280px;
 
-$clr-accent-50: #f7f6fc;
-$clr-accent-100: #f0eef9;
-$clr-accent-200: #e2dff5;
-$clr-accent-300: #cdc6ec;
-$clr-accent-400: #b2a5e0;
-$clr-accent-500: #957ed1;
-$clr-accent-600: #8464c3;
-$clr-accent-700: #7352af;
-$clr-accent-800: #614493;
-$clr-accent-900: #503979;
-$clr-accent-950: #332451;
+$clr-plum-50: #faf5f8;
+$clr-plum-100: #f7ecf2;
+$clr-plum-200: #f0dae7;
+$clr-plum-300: #e5bcd1;
+$clr-plum-400: #d492b4;
+$clr-plum-500: #c47098;
+$clr-plum-600: #af537b;
+$clr-plum-700: #954163;
+$clr-plum-800: #7c3852;
+$clr-plum-900: #683247;
+$clr-plum-950: #3e1928;
 
-$clr-highlight-50: #fff1f2;
-$clr-highlight-100: #fee5e7;
-$clr-highlight-200: #fccfd3;
-$clr-highlight-300: #faa7af;
-$clr-highlight-400: #f67686;
-$clr-highlight-500: #ee455f;
-$clr-highlight-600: #cb2143;
-$clr-highlight-700: #b8183c;
-$clr-highlight-800: #9a1738;
-$clr-highlight-900: #841736;
-$clr-highlight-950: #4a0719;
+$clr-red-50: #fff1f2;
+$clr-red-100: #fee5e7;
+$clr-red-200: #fccfd3;
+$clr-red-300: #faa7af;
+$clr-red-400: #f67686;
+$clr-red-500: #ee455f;
+$clr-red-600: #cb2143;
+$clr-red-700: #b8183c;
+$clr-red-800: #9a1738;
+$clr-red-900: #841736;
+$clr-red-950: #4a0719;
+
+$clr-orange-50: #fef6ee;
+$clr-orange-100: #fdecd7;
+$clr-orange-200: #fad4ae;
+$clr-orange-300: #f6b67b;
+$clr-orange-400: #f28d45;
+$clr-orange-500: #ee6d20;
+$clr-orange-600: #df5417;
+$clr-orange-700: #b93f15;
+$clr-orange-800: #933319;
+$clr-orange-900: #772d17;
+$clr-orange-950: #40140a;
 
 $clr-main-50: #f6f6f7;
 $clr-main-100: #eef0f1;
@@ -146,6 +158,12 @@ body {
       max-height: 250px;
     }
 
+    &-label {
+      background: $clr-main-950;
+      color: $clr-main-50;
+      fill: $clr-main-50;
+    }
+
     img {
       width: 100%;
       height: 100%;
@@ -197,7 +215,7 @@ body {
   padding: 1rem;
 
   &:hover {
-    fill: $clr-highlight-500;
+    fill: $clr-red-500;
   }
 
   &__fav-icon {
@@ -210,14 +228,35 @@ body {
       height: 100%;
     }
   }
+
+  &-active {
+    fill: $clr-red-500;
+
+    &:hover {
+      fill: $clr-red-600;
+    }
+  }
 }
 
 .star-rating {
   display: flex;
 
+  &__star {
+    fill: $clr-orange-500;
+  }
+
+  &__star-hovered {
+    fill: $clr-orange-400;
+  }
+
   &__icons svg {
     width: 16px;
     height: 16px;
+  }
+
+  &__icons-large svg {
+    width: 28px;
+    height: 28px;
   }
 }
 
@@ -302,17 +341,34 @@ body {
   background-color: $clr-main-500;
 }
 
-.about {
+.about_contain {
+  position: relative;
   text-align: center;
-  padding: 100px 0 150px 0;
+  overflow: hidden;
+  width: 100%;
+  height: 300px;
 
-  h1 {
-    font-size: 50px;
+  img {
+    width: 100%;
+    transform: translate(0%, -30%);
+  }
+
+  @media (max-width: 310px) {
+    .about_contain__image {
+      width: 100%;
+    }
   }
 }
 
+.about {
+  text-align: center;
+  padding: 40px 0 20px 0;
+  font-size: 18px;
+  font-style: helvetica;
+}
+
 .story_contain {
-  padding: 100px 0 100px 0;
+  padding: 50px 0 50px 0;
   margin: 0 auto;
 
   &__story {
@@ -324,17 +380,26 @@ body {
   &__img {
     flex: 1;
     overflow: hidden;
+    text-align: center;
+    padding-left: 10px;
 
     img {
+      padding-left: 0;
       max-width: 100%;
       height: auto;
+      width: 70%;
     }
   }
 
   &__content {
     flex: 1;
     text-align: left;
-    padding: 20px;
+    padding: 0 100px 0 0;
+
+    h2 {
+      color: #6c3444;
+      text-decoration: underline #3cb44b;
+    }
   }
 
   @media screen and (max-width: 768px) {
@@ -342,7 +407,8 @@ body {
       flex-direction: column;
     }
     .story_contain__img {
-      padding: 10px;
+      padding: 0 0 30px 0;
+      width: 75%;
     }
     .story_contain__content {
       padding: 10px;
@@ -351,27 +417,16 @@ body {
 }
 
 .mission {
-  padding: 100px 100px 100px 100px;
+  padding: 30px 100px 80px 100px;
 
   &__content {
     text-align: center;
   }
 
   h2 {
+    color: #6c3444;
+    text-decoration: underline #3cb44b;
     padding-bottom: 10px;
-  }
-}
-
-.team {
-  padding: 100px 0 100px 0;
-
-  h2 {
-    text-align: center;
-    padding-bottom: 20px;
-  }
-
-  &__content {
-    text-align: center;
   }
 }
 
@@ -419,4 +474,8 @@ textarea {
       padding: 10px 0 10px 0;
     }
   }
+}
+
+.fill-white {
+  fill: #ffffff;
 }

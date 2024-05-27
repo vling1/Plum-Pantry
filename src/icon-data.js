@@ -12,6 +12,9 @@ import check from "./assets/icons/check.svg";
 import question from "./assets/icons/question.svg";
 import plus from "./assets/icons/plus-lg.svg";
 import pencil from "./assets/icons/pencil.svg";
+import eye from "./assets/icons/eye.svg";
+import eyeSlash from "./assets/icons/eye-slash.svg";
+import tags from "./assets/icons/tags.svg";
 
 export default {
   arrowLeft: arrowLeft,
@@ -28,4 +31,7 @@ export default {
   question: question,
   plus: plus,
   pencil: pencil,
+  eye: eye,
+  eyeSlash: eyeSlash,
+  tags: tags,
 };

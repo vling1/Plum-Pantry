@@ -14,8 +14,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./scss/styles.scss";
 import { createHashRouter, RouterProvider } from "react-router-dom";
 
-import MyTest from "./TestFilesForBKND/testPage.jsx";
-
 const router = createHashRouter ([
   {
     path: "/",
@@ -61,10 +59,6 @@ const router = createHashRouter ([
   {
     path: "/editor/:recipeID",
     element: <RecipeEditor />,
-  },
-  {
-    path: "/BKNDTest/",
-    element: <MyTest />,
   },
 ]);
 

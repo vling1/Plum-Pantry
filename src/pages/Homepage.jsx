@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import api from "../api/axiosConfig.jsx";
 
 import logoCircle from "../assets/logo/logo-circle-small.webp";
+import { useNavigate } from "react-router-dom";
 
 export default function Homepage() {
   // Returns a list of given size with random, non-repeating recipes
@@ -34,7 +35,14 @@ export default function Homepage() {
     try {
       const response = await api.get("/db/Recipes");
       if (response.data && Array.isArray(response.data)) {
-        setRecipes(response.data);
+        let arr = [];
+        response.data.forEach((item) => {
+          if (item.isPublic) {
+            arr.push(item);
+          }
+        });
+        
+        setRecipes(arr);
         console.log(response.data);
       } else {
         console.error("Invalid response format:", response.data);
@@ -46,6 +54,9 @@ export default function Homepage() {
   useEffect(() => {
     getRecipes();
   }, []);
+
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <PageWrapper>

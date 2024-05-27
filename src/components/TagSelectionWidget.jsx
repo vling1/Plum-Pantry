@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import Tag from "./Tag.jsx";
 import Data from "../services/Data.jsx";
 
-import data from "../data.js";
-
 const maxSuggestionsLength = 10;
 
 export default function TagSelectionWidget({

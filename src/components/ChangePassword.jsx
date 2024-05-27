@@ -1,74 +1,140 @@
-import { Button, Form } from "react-bootstrap";
-import { useState } from "react";
+import { Button, Form, Modal } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { authInfo } from "../services/authUtils";
+import Data from "../services/Data";
 
 export default function ChangePassword() {
-  const [validated, setValidated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [userId, setUserId] = useState();
 
-  const [form_Data, set_Form_Data] = useState({
+  const [formData, setFormData] = useState({
+    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
+    currentPasswordFeedback: "Password must be at least 6 characters long.",
+    newPasswordFeedback: "Password must be at least 6 characters long",
+  });
+  const [isInvalid] = useState({
+    currentPassword: false,
+    newPassword: false,
+    confirmPassword: false,
   });
 
-  const handleSubmit = (event) => {
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
+  function currentPasswordFeedback() {
+    if (formData.currentPassword.length < 6) {
+      return "Password must be at least 6 characters long.";
     }
+    return "Incorrect password.";
+  }
 
-    setValidated(true);
-  };
+  function newPasswordFeedback() {
+    if (formData.newPassword.length < 6) {
+      return "Password must be at least 6 characters long.";
+    }
+    return "New password is the same as the current password.";
+  }
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    set_Form_Data({
-      ...form_Data,
+    setFormData({
+      ...formData,
       [name]: value,
     });
   };
 
+  const handleSubmit = (event) => {
+    isInvalid.currentPassword = formData.currentPassword != password;
+    isInvalid.newPassword =
+      formData.newPassword.length < 6 ||
+      formData.currentPassword == formData.newPassword;
+    isInvalid.confirmPassword =
+      formData.newPassword != formData.confirmPassword;
+
+    formData.currentPasswordFeedback = currentPasswordFeedback();
+    formData.newPasswordFeedback = newPasswordFeedback();
+
+    handleChange(event);
+
+    if (
+      isInvalid.currentPassword ||
+      isInvalid.newPassword ||
+      isInvalid.confirmPassword
+    ) {
+      event.stopPropagation();
+    } else {
+      updatePassword();
+      handleShow();
+    }
+
+    event.preventDefault();
+  };
+
+  const updatePassword = async () => {
+    try {
+      const data = {
+        password: formData.confirmPassword,
+      };
+
+      Data.put("Users/update/" + userId, data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => {
+    setShow(false);
+    window.location.reload();
+  };
+  const handleShow = () => setShow(true);
+
+  useEffect(() => {
+    Data.get("Users/" + authInfo()).then((response) => {
+      setPassword(response.password);
+      setUserId(response.userId);
+    });
+  }, []);
+
   return (
-    <Form
-      className="mt-4 ms-3"
-      noValidate
-      validated={validated}
-      onSubmit={handleSubmit}
-    >
+    <Form className="mt-4 ms-3" onSubmit={handleSubmit}>
       <Form.Label>
         <h4>Change Password</h4>
       </Form.Label>
       <Form.Group className="mb-2">
         <Form.Label>Current Password</Form.Label>
-        <Form.Control required type="password" />
+        <Form.Control
+          type="password"
+          name="currentPassword"
+          value={formData.currentPassword}
+          onChange={handleChange}
+          isInvalid={isInvalid.currentPassword}
+        />
+        <Form.Control.Feedback type="invalid">
+          {formData.currentPasswordFeedback}
+        </Form.Control.Feedback>
       </Form.Group>
       <Form.Group className="mb-2">
         <Form.Label>New Password</Form.Label>
         <Form.Control
-          required
           type="password"
           name="newPassword"
-          value={form_Data.newPassword}
+          value={formData.newPassword}
           onChange={handleChange}
-          minLength={6}
-          isInvalid={validated && form_Data.newPassword < 6}
+          isInvalid={isInvalid.newPassword}
         />
         <Form.Control.Feedback type="invalid">
-          Password must be at least 6 characters long.
+          {formData.newPasswordFeedback}
         </Form.Control.Feedback>
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Label>Confirm Password</Form.Label>
         <Form.Control
-          required
           type="password"
           name="confirmPassword"
-          value={form_Data.confirmPassword}
+          value={formData.confirmPassword}
           onChange={handleChange}
-          minLength={6}
-          pattern={form_Data.newPassword}
-          isInvalid={
-            validated && form_Data.confirmPassword !== form_Data.newPassword
-          }
+          isInvalid={isInvalid.confirmPassword}
         />
         <Form.Control.Feedback type="invalid">
           Passwords do not match.
@@ -77,6 +143,17 @@ export default function ChangePassword() {
       <Button type="submit" variant="primary">
         Update
       </Button>
+      {/** Modal for after successfully changing password */}
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Password successfully changed.</Modal.Title>
+        </Modal.Header>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Form>
   );
 }

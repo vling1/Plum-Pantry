@@ -1,16 +1,11 @@
 import PageWrapper from "./../components/PageWrapper.jsx";
 import { Button, Card, Form, Image, InputGroup } from "react-bootstrap";
-import {
-  useSearchParams,
-  useParams,
-  useNavigate,
-  Link,
-} from "react-router-dom";
+import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Tag from "../components/Tag.jsx";
 import TagSelectionWidget from "../components/TagSelectionWidget.jsx";
 import TagMeasuringWidget from "../components/TagMeasuringWidget.jsx";
 import api from "../api/axiosConfig.jsx";
+import Data from "../services/Data.jsx";
 import { isLoggedIn, authInfo } from "../services/authUtils.jsx";
 
 export default function RecipeEditor() {
@@ -135,22 +130,13 @@ export default function RecipeEditor() {
       }));
 
       if (recipeID) {
-        const response = await api.get("/db/Recipes/recipe/" + recipeID);
-
         let hours = formData.hours == "" ? 0 : parseInt(formData.hours);
         let minutes = formData.minutes == "" ? 0 : parseInt(formData.minutes);
-
-        let rating = response.data.rating;
-        if (rating % 0.5 == 0) {
-          rating -= 0.1;
-        }
 
         const recipe = {
           recipeTitle: formData.title,
           image: formData.image,
           cookTime: hours * 60 + minutes,
-          rating: rating,
-          username: response.data.username,
           isPublic: privacy == "1",
           recipeTags: tagData,
           instructions: formData.instructions.split("\n"),
@@ -158,14 +144,7 @@ export default function RecipeEditor() {
           measDescr: ingrData,
         };
 
-        api
-          .put("/db/Recipes/update/" + recipeID, recipe)
-          .then((response) => {
-            console.log(response.data);
-          })
-          .catch((error) => {
-            console.error(error);
-          });
+        Data.put("Recipes/update/" + recipeID, recipe);
       } else {
         let hours = formData.hours == "" ? 0 : parseInt(formData.hours);
         let minutes = formData.minutes == "" ? 0 : parseInt(formData.minutes);
@@ -174,7 +153,6 @@ export default function RecipeEditor() {
           recipeTitle: formData.title,
           image: formData.image,
           cookTime: hours * 60 + minutes,
-          rating: 0.1,
           username: username,
           isPublic: privacy == "1",
           tags: tagData,
@@ -183,12 +161,7 @@ export default function RecipeEditor() {
           measDescr: ingrData,
         };
 
-        try {
-          let result = await api.post("/db/Recipes", recipe);
-          console.log(result.response.data);
-        } catch (error) {
-          console.error(error.response.data);
-        }
+        Data.post("Recipes", recipe);
       }
     } catch (err) {
       console.error("Error fetching recipe:", err);
@@ -199,6 +172,10 @@ export default function RecipeEditor() {
   const getRecipe = async () => {
     try {
       const response = await api.get("/db/Recipes/recipe/" + recipeID);
+
+      if (response.data.username != authInfo()) {
+        navigate("/error404");
+      }
       if (response.data) {
         let time = timeFormat(response.data.cookTime);
         let ingredients = response.data.measDescr.map((dict) => ({
